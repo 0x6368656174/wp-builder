@@ -232,7 +232,6 @@ export function webpackConfig(params: IConfigParams): Configuration {
           editorStyle: {
             chunks: 'all',
             enforce: true,
-            minSize: 0,
             name: 'editor-style',
             test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'editor-style',
           },
