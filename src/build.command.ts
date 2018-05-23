@@ -20,15 +20,22 @@ export function handler(argv: IArgv) {
 
   webpack(webpackConfig({mode}), (err: any, stats: any) => {
     if (err) {
-      console.error(err);
-      return;
+      process.stderr.write(err + '\n');
+      process.exit(1);
     }
 
-    console.log(stats.toString({
-      // chunks: false,
+    process.stdout.write(stats.toString({
+      asserts: false,
+      assetsSort: '!size',
+      children: false,
+      chunkModules: false,
+      chunkOrigins: false,
+      chunks: false,
       colors: true,
-    }));
+      entrypoints: false,
+      modules: false,
+    }) + '\n');
 
-    process.exit(1);
+    process.exit(0);
   });
 }

@@ -8,7 +8,7 @@ import {readConfig} from './config-read';
 export class SuppressChunksPlugin {
   public apply(compiler: Compiler) {
     const wpConfig = readConfig();
-    const project = wpConfig.projects[wpConfig.defaultProject];
+    const project = wpConfig.themes[wpConfig.defaultTheme];
     const context = join(process.cwd(), project.root);
 
     const skipChunkNames = ['style', 'vendors', 'commons'];

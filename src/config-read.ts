@@ -3,21 +3,22 @@ import { join } from 'path';
 
 interface IBuild {
   outputPath: string;
-  themeName?: string;
 }
 
-interface IProject {
+interface ITheme {
   root: string;
+  asserts?: string[];
+  mainTemplates: string[];
   style?: string;
   editorStyle?: string;
-  build: IBuild;
 }
 
 interface IConfig {
-  projects: {
-    [name: string]: IProject;
+  build: IBuild;
+  themes: {
+    [name: string]: ITheme;
   };
-  defaultProject: string;
+  defaultTheme: string;
 }
 
 export function readConfig(): IConfig {
@@ -26,7 +27,5 @@ export function readConfig(): IConfig {
     throw new Error('Local workspace file (\'wpbuild.json\') could not be found.');
   }
 
-  const config = require(configPath);
-
-  return config;
+  return require(configPath);
 }

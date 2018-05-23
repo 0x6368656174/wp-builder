@@ -1,24 +1,24 @@
 import { existsSync } from 'fs';
-import { short } from 'git-rev-sync';
 import { getOptions } from 'loader-utils';
 import { basename, join } from 'path';
 import { readConfig } from './config-read';
 import * as webpack from 'webpack';
 import LoaderContext = webpack.loader.LoaderContext;
+import {version} from './version';
 
-function isBase(resourceBaseName: string) {
-  return resourceBaseName === 'base.twig' || resourceBaseName === 'print.twig';
+function isBase(resourceBaseName: string, mainTemplates: string[]) {
+  return mainTemplates.indexOf(resourceBaseName) !== -1;
 }
 
 module.exports = function(this: LoaderContext, content: string): string {
   const options = getOptions(this);
 
   const wpConfig = readConfig();
-  const project = wpConfig.projects[wpConfig.defaultProject];
+  const project = wpConfig.themes[wpConfig.defaultTheme];
   const context = join(process.cwd(), project.root);
   const outputPath = '{{ theme.path }}';
   const isDevelopment = options.mode === 'development';
-  const version = isDevelopment ? '?v=dev' : `?v=${short(process.cwd())}`;
+  const versionString = `?v=${version(isDevelopment)}`;
 
   const resourceBaseName = basename(this.resourcePath);
 
@@ -30,16 +30,16 @@ module.exports = function(this: LoaderContext, content: string): string {
     jsDistFile = this.resourcePath.replace(context, outputPath).replace(/\.twig$/, '.js');
   }
 
-  const script = `<script  type="text/javascript" src="${jsDistFile}${version}" defer></script>\n`;
+  const script = `<script  type="text/javascript" src="${jsDistFile}${versionString}" defer></script>\n`;
 
-  if (isBase(resourceBaseName)) {
+  if (isBase(resourceBaseName, project.mainTemplates)) {
     let headScripts = '';
 
     // Добавим vendors.js
-    headScripts += `<script type="text/javascript" src="{{ theme.path }}/vendors.js${version}" defer></script>\n`;
+    headScripts += `<script type="text/javascript" src="{{ theme.path }}/vendors.js${versionString}" defer></script>\n`;
 
     // Добавим commons.js
-    headScripts += `<script type="text/javascript" src="{{ theme.path }}/commons.js${version}" defer></script>\n`;
+    headScripts += `<script type="text/javascript" src="{{ theme.path }}/commons.js${versionString}" defer></script>\n`;
 
     // Если dev, то добавим скрипт вебпака
     if (isDevelopment) {
@@ -63,7 +63,7 @@ module.exports = function(this: LoaderContext, content: string): string {
     content = content.replace('</body>', `${baseScripts}</body>`);
 
     content = content.replace('</head>',
-      `<link rel="stylesheet"  type="text/css" href='{{ theme.path }}/style.css${version}'>\n</head>`);
+      `<link rel="stylesheet"  type="text/css" href='{{ theme.path }}/style.css${versionString}'>\n</head>`);
   } else {
     // Для остальных шаблонов
     if (jsDistFile) {

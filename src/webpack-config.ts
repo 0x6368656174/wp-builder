@@ -1,7 +1,8 @@
+import * as CleanWebpackPlugin from 'clean-webpack-plugin';
+import * as CopyWebpackPlugin from 'copy-webpack-plugin';
 import * as cssnano from 'cssnano';
 import * as ExtractTextPlugin from 'extract-text-webpack-plugin';
 import {existsSync, readFileSync} from 'fs';
-import { short } from 'git-rev-sync';
 import * as glob from 'glob';
 import * as ExtractCssPlugin from 'mini-css-extract-plugin';
 import { join, resolve } from 'path';
@@ -10,21 +11,28 @@ import { SuppressChunksPlugin } from './suppress-chunks.plugin';
 import { Configuration } from 'webpack';
 import * as webpack from 'webpack';
 import { readConfig } from './config-read';
+import {version} from './version';
 
 interface IConfigParams {
   mode: 'development' | 'production';
+  theme?: string;
 }
 
 export function webpackConfig(params: IConfigParams): Configuration {
   const isDevelopment = params.mode === 'development';
-
   const wpConfig = readConfig();
-  const project = wpConfig.projects[wpConfig.defaultProject];
-  const context = join(process.cwd(), project.root);
 
-  const themeName = project.build.themeName || 'project-theme';
+  const themeName = params.theme || wpConfig.defaultTheme;
+  const theme = wpConfig.themes[themeName];
+
+  if (!theme) {
+    throw new Error(`Not found configuration for theme "${themeName}"`);
+  }
+
+  const context = join(process.cwd(), theme.root);
+
   const outputPublicPath = `/wp-content/themes/${themeName}/`;
-  const outputPath = resolve(process.cwd(), project.build.outputPath, outputPublicPath.substr(1));
+  const outputPath = resolve(process.cwd(), wpConfig.build.outputPath, outputPublicPath.substr(1));
 
   const extractTwigPlugin = new ExtractTextPlugin({
     filename: '[name].twig',
@@ -53,13 +61,23 @@ export function webpackConfig(params: IConfigParams): Configuration {
 
   function styleBannerContent() {
     const styleCssContent = readFileSync(resolve(context, 'style.css'), 'utf-8');
-    const version = !isDevelopment ? short(process.cwd()) : 'dev';
-    return styleCssContent.replace(/Version:.*$/, `Version: ${version}`);
+    const versionString = version(isDevelopment);
+    return styleCssContent.replace(/Version:.*$/, `Version: ${versionString}`);
+  }
+
+  function getAsserts() {
+    const asserts = theme.asserts || [];
+    return asserts.map(assert => {
+      return {
+        from: assert,
+        to: outputPath,
+      };
+    });
   }
 
   return {
-    context: process.cwd(),
-    devtool: 'source-map',
+    context,
+    devtool: isDevelopment ? 'source-map' : false,
     entry: () => {
       // Добавим шаблоны и скрипты для них
       const files = glob.sync(`${context}/**/*.twig`);
@@ -98,7 +116,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
       });
 
       // Добавим стили редактора
-      const editorStyleCss = project.style || 'editor-style.css';
+      const editorStyleCss = theme.style || 'editor-style.css';
       if (existsSync(join(context, editorStyleCss))) {
         entries.push({'editor-style': resolve(context, editorStyleCss)});
       }
@@ -219,6 +237,18 @@ export function webpackConfig(params: IConfigParams): Configuration {
         test: /style.css/,
       }),
       new SuppressChunksPlugin(),
+      new CopyWebpackPlugin([
+        ...getAsserts(),
+        {
+          from: `**/*.php`,
+          to: outputPath,
+        },
+        {
+          from: `screenshot.png`,
+          to: outputPath,
+        },
+      ]),
+      new CleanWebpackPlugin([outputPath], {root: join(process.cwd(), wpConfig.build.outputPath), verbose: false}),
     ],
     resolve: {
       // Добавим ts, чтоб правильно компилировался TypeScript
@@ -230,5 +260,4 @@ export function webpackConfig(params: IConfigParams): Configuration {
     },
     target: 'web',
   };
-
 }
