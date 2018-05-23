@@ -163,12 +163,14 @@ export function webpackConfig(params: IConfigParams): Configuration {
               loader: 'css-loader',
               options: {
                 minimize: !isDevelopment,
+                sourceMap: isDevelopment,
               },
             },
             {
               loader: 'postcss-loader',
               options: {
                 plugins: postcssCssNextPlugins,
+                sourceMap: isDevelopment,
               },
             },
             {
@@ -176,6 +178,9 @@ export function webpackConfig(params: IConfigParams): Configuration {
             },
             {
               loader: 'sass-loader',
+              options: {
+                sourceMap: isDevelopment,
+              },
             },
           ],
         },

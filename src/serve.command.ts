@@ -1,15 +1,16 @@
 import { spawn } from 'child_process';
 import { join } from 'path';
-import { readConfig } from './config-read';
-import { statsConfig } from './stats';
 import * as webpack from 'webpack';
-import { webpackConfig } from './webpack-config';
 import * as WebpackDevServer from 'webpack-dev-server';
 import * as WriteFileWebpackPlugin from 'write-file-webpack-plugin';
+import { Options } from 'yargs';
+import { readConfig } from './config-read';
+import { statsConfig } from './stats';
+import { webpackConfig } from './webpack-config';
 
 export const command = 'serve';
 export const describe = 'Run site local';
-export const builder = {
+export const builder: {[key: string]: Options} = {
   host: {
     default: 'localhost',
     describe: 'Host',

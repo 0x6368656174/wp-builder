@@ -1,10 +1,11 @@
 import * as webpack from 'webpack';
+import { Options } from 'yargs';
 import { statsConfig } from './stats';
 import { webpackConfig } from './webpack-config';
 
 export const command = 'build';
 export const describe = 'Build site';
-export const builder = {
+export const builder: {[key: string]: Options} = {
   prod: {
     alias: 'p',
     default: false,
