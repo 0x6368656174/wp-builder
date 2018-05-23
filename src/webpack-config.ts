@@ -64,7 +64,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
   function styleBannerContent() {
     const styleCssContent = readFileSync(resolve(context, 'style.css'), 'utf-8');
     const versionString = version(isDevelopment);
-    return styleCssContent.replace(/Version:.*$/, `Version: ${versionString}`);
+    return styleCssContent.replace(/Version:.*/, `Version: ${versionString}`);
   }
 
   function getAsserts() {
