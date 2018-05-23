@@ -122,6 +122,10 @@ export function webpackConfig(params: IConfigParams): Configuration {
         return {...result, ...val};
       }, {}) as any;
     },
+    // Будем использовать jQuery WordPress'a
+    externals: {
+      jquery: 'jQuery',
+    },
     mode: isDevelopment ? 'development' : 'production',
     module: {
       rules: [
@@ -190,6 +194,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
       ],
     },
     optimization: {
+      runtimeChunk: 'single',
       splitChunks: {
         cacheGroups: {
           // В commons.js будет содержаться все, что используется больше чем в 2 модулях
@@ -199,6 +204,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
             minSize: 0,
             name: 'commons',
             priority: -10,
+            test: /\.[jt]s$/,
           },
           // Все стили вынесем в style.css
           styles: {
@@ -246,8 +252,13 @@ export function webpackConfig(params: IConfigParams): Configuration {
         },
       ]),
       new CleanWebpackPlugin([outputPath], {root: join(process.cwd(), wpConfig.build.outputPath), verbose: false}),
-      // Не будем добавлять jQuery, т.к. WordPress все-равно его тянет
-      new webpack.IgnorePlugin(/jquery$/),
+      // Добавим глобальный объявления для jQuery
+      new webpack.ProvidePlugin({
+        '$'                : 'jquery',
+        'jQuery'           : 'jquery',
+        'window.$'         : 'jquery',
+        'window.jQuery'    : 'jquery',
+      }),
     ],
     resolve: {
       // Добавим ts, чтоб правильно компилировался TypeScript

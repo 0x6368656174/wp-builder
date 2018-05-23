@@ -19,7 +19,7 @@ module.exports = function(this: LoaderContext, content: string): string {
   const outputPath = '{{ theme.path }}';
   const isDevelopment = options.mode === 'development';
   const serve = options.serve;
-  const versionString = `?v=${version(isDevelopment)}`;
+  const versionString = `?ver=${version(isDevelopment)}`;
 
   const resourceBaseName = basename(this.resourcePath);
 
@@ -36,11 +36,17 @@ module.exports = function(this: LoaderContext, content: string): string {
   if (isBase(resourceBaseName, project.mainTemplates)) {
     let headScripts = '';
 
+    // Добавим runtime.js
+    headScripts += `<script type="text/javascript" src="{{ theme.path }}/runtime.js${versionString}" defer></script>\n`;
+
     // Добавим vendors.js
     headScripts += `<script type="text/javascript" src="{{ theme.path }}/vendors.js${versionString}" defer></script>\n`;
 
     // Добавим commons.js
     headScripts += `<script type="text/javascript" src="{{ theme.path }}/commons.js${versionString}" defer></script>\n`;
+
+    // Добавим style.js, т.к. иначе WebPack не запустит все, что зависит от style
+    headScripts += `<script type="text/javascript" src="{{ theme.path }}/style.js${versionString}" defer></script>\n`;
 
     // Если serve, то добавим скрипт вебпака
     if (serve) {
@@ -75,8 +81,6 @@ module.exports = function(this: LoaderContext, content: string): string {
       } else {
         // Создалим блок js и добавим в него скрипт
         content += `{% block js %}\n${script}{% endblock %}\n`;
-        // content += `{% block js %}{% endblock %}\n`;
-        // content += script;
       }
     }
   }

@@ -11,7 +11,7 @@ export class SuppressChunksPlugin {
     const project = wpConfig.themes[wpConfig.defaultTheme];
     const context = join(process.cwd(), project.root);
 
-    const skipChunkNames = ['style', 'vendors', 'commons'];
+    const skipChunkNames = ['style', 'vendors', 'commons', 'runtime'];
 
     compiler.hooks.shouldEmit.tap('SuppressChunksPlugin', (compilation: Compilation) => {
       for (const chunk of compilation.chunks) {
@@ -30,9 +30,9 @@ export class SuppressChunksPlugin {
         }
       }
 
-      // Удалим js и js.map для стилей
-      delete compilation.assets['style.js'];
-      delete compilation.assets['style.js.map'];
+      // // Удалим js и js.map для стилей
+      // delete compilation.assets['style.js'];
+      // delete compilation.assets['style.js.map'];
       return true;
     });
   }
