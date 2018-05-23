@@ -72,7 +72,7 @@ module.exports = function(this: LoaderContext, content: string): string {
     let headStyles = '';
 
     // Добавим vendor.css
-    headStyles += `<link rel="stylesheet"  type="text/css" href="{{ theme.path }}/vendor.css${versionString}">\n`;
+    headStyles += `<link rel="stylesheet"  type="text/css" href="{{ theme.path }}/vendors.css${versionString}">\n`;
 
     // Добавим style.css
     headStyles += `<link rel="stylesheet"  type="text/css" href="{{ theme.path }}/style.css${versionString}">\n`;
