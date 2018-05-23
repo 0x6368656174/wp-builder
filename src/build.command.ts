@@ -25,7 +25,7 @@ export function handler(argv: IArgv) {
     }
 
     console.log(stats.toString({
-      chunks: false,
+      // chunks: false,
       colors: true,
     }));
 

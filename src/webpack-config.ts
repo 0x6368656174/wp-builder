@@ -6,6 +6,7 @@ import * as glob from 'glob';
 import * as ExtractCssPlugin from 'mini-css-extract-plugin';
 import { join, resolve } from 'path';
 import * as postcssCssNext from 'postcss-cssnext';
+import { SuppressChunksPlugin } from './suppress-chunks.plugin';
 import { Configuration } from 'webpack';
 import * as webpack from 'webpack';
 import { readConfig } from './config-read';
@@ -217,6 +218,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
         raw: true,
         test: /style.css/,
       }),
+      new SuppressChunksPlugin(),
     ],
     resolve: {
       // Добавим ts, чтоб правильно компилировался TypeScript
