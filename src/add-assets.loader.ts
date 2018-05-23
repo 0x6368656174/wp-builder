@@ -71,7 +71,7 @@ module.exports = function(this: LoaderContext, content: string): string {
 
     let headStyles = '';
 
-    // Добавим vendor.css
+    // Добавим vendors.css
     headStyles += `<link rel="stylesheet"  type="text/css" href="{{ theme.path }}/vendors.css${versionString}">\n`;
 
     // Добавим style.css
