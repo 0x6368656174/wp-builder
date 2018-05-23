@@ -11,6 +11,5 @@ yargs.usage('Usage: $0 [command]')
   .version('1.0.0')
   .locale('en')
   .help('help')
-  .epilog('(c) 2018 Pavel Puchkov <0x6368656174@gmail.com> https://github.com/0x6368656174/wp-build');
-
-yargs.showHelp();
+  .epilog('(c) 2018 Pavel Puchkov <0x6368656174@gmail.com> https://github.com/0x6368656174/wp-build')
+  .argv;

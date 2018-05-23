@@ -3,7 +3,7 @@ import { join } from 'path';
 import { Compiler } from 'webpack';
 import * as webpack from 'webpack';
 import Compilation = webpack.compilation.Compilation;
-import {readConfig} from './config-read';
+import { readConfig } from './config-read';
 
 export class SuppressChunksPlugin {
   public apply(compiler: Compiler) {

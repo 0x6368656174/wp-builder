@@ -2,7 +2,7 @@ import * as CleanWebpackPlugin from 'clean-webpack-plugin';
 import * as CopyWebpackPlugin from 'copy-webpack-plugin';
 import * as cssnano from 'cssnano';
 import * as ExtractTextPlugin from 'extract-text-webpack-plugin';
-import {existsSync, readFileSync} from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import * as glob from 'glob';
 import * as ExtractCssPlugin from 'mini-css-extract-plugin';
 import { join, resolve } from 'path';
@@ -11,15 +11,17 @@ import { SuppressChunksPlugin } from './suppress-chunks.plugin';
 import { Configuration } from 'webpack';
 import * as webpack from 'webpack';
 import { readConfig } from './config-read';
-import {version} from './version';
+import { version } from './version';
 
 interface IConfigParams {
   mode: 'development' | 'production';
+  serve?: boolean;
   theme?: string;
 }
 
 export function webpackConfig(params: IConfigParams): Configuration {
   const isDevelopment = params.mode === 'development';
+  const serve = params.serve || false;
   const wpConfig = readConfig();
 
   const themeName = params.theme || wpConfig.defaultTheme;
@@ -84,7 +86,6 @@ export function webpackConfig(params: IConfigParams): Configuration {
       const entries = files.map(file => {
         const result = [file];
 
-        // if (!onlyTwig) {
         const tsFile = file.replace(/\.twig$/, '.ts');
         const jsFile = file.replace(/\.twig$/, '.js');
         if (existsSync(tsFile)) {
@@ -103,22 +104,17 @@ export function webpackConfig(params: IConfigParams): Configuration {
         } else if (existsSync(cssFile)) {
           result.push(cssFile);
         }
-        // }
 
         const filePath = file.replace(new RegExp(`^${context}/`), '');
         const fileName = filePath.replace(/\.twig$/, '');
 
-        if (result.length === 1) {
-          return {[fileName]: result[0]};
-        } else {
-          return {[fileName]: result};
-        }
+        return {[fileName]: result};
       });
 
       // Добавим стили редактора
       const editorStyleCss = theme.style || 'editor-style.css';
       if (existsSync(join(context, editorStyleCss))) {
-        entries.push({'editor-style': resolve(context, editorStyleCss)});
+        entries.push({'editor-style': [resolve(context, editorStyleCss)]});
       }
 
       // FIXME: Убрать any, когда в определнии вебпака починят EntryFunc
@@ -140,6 +136,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
                   loader: 'add-assets.loader',
                   options: {
                     mode: isDevelopment ? 'development' : 'production',
+                    serve,
                   },
                 },
               ],
@@ -249,6 +246,8 @@ export function webpackConfig(params: IConfigParams): Configuration {
         },
       ]),
       new CleanWebpackPlugin([outputPath], {root: join(process.cwd(), wpConfig.build.outputPath), verbose: false}),
+      // Не будем добавлять jQuery, т.к. WordPress все-равно его тянет
+      new webpack.IgnorePlugin(/jquery$/),
     ],
     resolve: {
       // Добавим ts, чтоб правильно компилировался TypeScript

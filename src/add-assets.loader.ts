@@ -4,7 +4,7 @@ import { basename, join } from 'path';
 import { readConfig } from './config-read';
 import * as webpack from 'webpack';
 import LoaderContext = webpack.loader.LoaderContext;
-import {version} from './version';
+import { version } from './version';
 
 function isBase(resourceBaseName: string, mainTemplates: string[]) {
   return mainTemplates.indexOf(resourceBaseName) !== -1;
@@ -18,6 +18,7 @@ module.exports = function(this: LoaderContext, content: string): string {
   const context = join(process.cwd(), project.root);
   const outputPath = '{{ theme.path }}';
   const isDevelopment = options.mode === 'development';
+  const serve = options.serve;
   const versionString = `?v=${version(isDevelopment)}`;
 
   const resourceBaseName = basename(this.resourcePath);
@@ -41,8 +42,8 @@ module.exports = function(this: LoaderContext, content: string): string {
     // Добавим commons.js
     headScripts += `<script type="text/javascript" src="{{ theme.path }}/commons.js${versionString}" defer></script>\n`;
 
-    // Если dev, то добавим скрипт вебпака
-    if (isDevelopment) {
+    // Если serve, то добавим скрипт вебпака
+    if (serve) {
       headScripts += '<script type="text/javascript" src="http://localhost:4201/webpack-dev-server.js" defer></script>\n';
     }
 
