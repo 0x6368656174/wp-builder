@@ -69,8 +69,17 @@ module.exports = function(this: LoaderContext, content: string): string {
     // Добавим срипты
     content = content.replace('</body>', `${baseScripts}</body>`);
 
-    content = content.replace('</head>',
-      `<link rel="stylesheet"  type="text/css" href='{{ theme.path }}/style.css${versionString}'>\n</head>`);
+    let headStyles = '';
+
+    // Добавим vendor.css
+    headStyles += `<link rel="stylesheet"  type="text/css" href="{{ theme.path }}/vendor.css${versionString}">\n`;
+
+    // Добавим style.css
+    headStyles += `<link rel="stylesheet"  type="text/css" href="{{ theme.path }}/style.css${versionString}">\n`;
+
+    // Добавим стили
+    content = content.replace('</head>', `${headStyles}</head>`);
+
   } else {
     // Для остальных шаблонов
     if (jsDistFile) {

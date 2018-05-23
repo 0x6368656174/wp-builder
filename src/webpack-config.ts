@@ -77,6 +77,16 @@ export function webpackConfig(params: IConfigParams): Configuration {
     });
   }
 
+  function recursiveIssuer(m: any): string | false {
+    if (m.issuer) {
+      return recursiveIssuer(m.issuer);
+    } else if (m.name) {
+      return m.name;
+    } else {
+      return false;
+    }
+  }
+
   return {
     context,
     devtool: isDevelopment ? 'source-map' : false,
@@ -112,9 +122,15 @@ export function webpackConfig(params: IConfigParams): Configuration {
       });
 
       // Добавим стили редактора
-      const editorStyleCss = theme.style || 'editor-style.css';
-      if (existsSync(join(context, editorStyleCss))) {
-        entries.push({'editor-style': [resolve(context, editorStyleCss)]});
+      const editorStyleScss = join(context, 'editor-style.scss');
+      const editorStyleSass = join(context, 'editor-style.sass');
+      const editorStyleCss = join(context, 'editor-style.css');
+      if (existsSync(editorStyleScss)) {
+        entries.push({'editor-style': [editorStyleScss]});
+      } else if (existsSync(editorStyleSass)) {
+        entries.push({'editor-style': [editorStyleSass]});
+      } else if (existsSync(editorStyleCss)) {
+        entries.push({'editor-style': [editorStyleCss]});
       }
 
       // FIXME: Убрать any, когда в определнии вебпака починят EntryFunc
@@ -174,12 +190,14 @@ export function webpackConfig(params: IConfigParams): Configuration {
               },
             },
             {
+              // Используем, для того, чтоб в scss правильно резелвились url()
               loader: 'resolve-url-loader',
             },
             {
               loader: 'sass-loader',
               options: {
-                sourceMap: isDevelopment,
+                // Для Sass-loader source map должен геренироваться всегда, иначен е будет работать resolve-url-loader
+                sourceMap: true,
               },
             },
           ],
@@ -211,12 +229,20 @@ export function webpackConfig(params: IConfigParams): Configuration {
             priority: -10,
             test: /\.[jt]s$/,
           },
+          editorStyle: {
+            chunks: 'all',
+            enforce: true,
+            minSize: 0,
+            name: 'editor-style',
+            test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'editor-style',
+          },
           // Все стили вынесем в style.css
-          styles: {
+          style: {
             chunks: 'all',
             enforce: true,
             name: 'style',
-            test: /\.s?[ac]ss$/,
+            priority: -10,
+            test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) !== 'editor-style',
           },
           // В vendors.js будет содержаться все, что из node_modules
           vendors: {
@@ -242,7 +268,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
       new webpack.BannerPlugin({
         banner: styleBannerContent(),
         raw: true,
-        test: /style.css/,
+        test: /^style.css/,
       }),
       new SuppressChunksPlugin(),
       new CopyWebpackPlugin([

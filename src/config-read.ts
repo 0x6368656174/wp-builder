@@ -9,8 +9,6 @@ interface ITheme {
   root: string;
   asserts?: string[];
   mainTemplates: string[];
-  style?: string;
-  editorStyle?: string;
 }
 
 interface IConfig {
