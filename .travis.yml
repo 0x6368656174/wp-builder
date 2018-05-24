@@ -1,7 +1,11 @@
 language: nodejs
 
+node_js: '8'
+
+cache: yarn
+
 before_script:
-  - npm install
+  - yarn install
   - node node_modules/.bin/tsc
   - cp package.json dist
   - cp src/router.php dist
@@ -10,7 +14,7 @@ before_script:
 
 before_deploy:
   - cd dist
-  - npm pack
+  - yarn pack
 
 deploy:
   - provider: releases
