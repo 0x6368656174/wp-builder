@@ -1,9 +1,5 @@
 language: nodejs
 
-node_js:
-  - node
-  - 6
-
 cache: yarn
 
 before_script:
