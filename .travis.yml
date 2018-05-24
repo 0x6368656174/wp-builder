@@ -1,0 +1,28 @@
+language: nodejs
+
+before_script:
+  - npm instal
+  - npm node_modules/.bin/tsc
+  - cp package.json dist
+  - cp src/router.php dist
+  - cp README.md dist
+  - cp LICENSE dist
+
+before_deploy:
+  - cd dist
+  - npm pack
+
+deploy:
+  - provider: releases
+    api_key: $GITHUB_TOKEN
+    file_glob: true
+    file: "wp-builder-*.tgz"
+    skip_cleanup: true
+    on:
+      tags: true
+  - provider: npm
+    skip_cleanup: true
+    email: "0x6368656174@gmail.com"
+    api_key: $NPM_TOKEN
+    on:
+      tags: true
