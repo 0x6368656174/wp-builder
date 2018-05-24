@@ -2,7 +2,7 @@ language: nodejs
 
 before_script:
   - npm install
-  - npm node_modules/.bin/tsc
+  - node node_modules/.bin/tsc
   - cp package.json dist
   - cp src/router.php dist
   - cp README.md dist
