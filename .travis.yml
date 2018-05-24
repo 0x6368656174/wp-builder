@@ -31,8 +31,8 @@ deploy:
     on:
       tags: true
   - provider: npm
-    skip_cleanup: true
-    email: "0x6368656174@gmail.com"
     api_key: $NPM_TOKEN
+    email: "0x6368656174@gmail.com"
+    skip_cleanup: true
     on:
       tags: true
