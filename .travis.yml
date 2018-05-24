@@ -1,5 +1,8 @@
 language: nodejs
 
+node_js:
+  - "node"
+
 cache: yarn
 
 before_script:
@@ -9,9 +12,14 @@ before_script:
   - cp src/router.php dist
   - cp README.md dist
   - cp LICENSE dist
+  - cd dist
+
+script:
+  - node index.js --help
+  - node index.js build --help
+  - node index.js serve --help
 
 before_deploy:
-  - cd dist
   - yarn pack
 
 deploy:
