@@ -1,0 +1,15 @@
+{
+  "themes": {
+    "%PROJECT_THEME_NAME%": {
+      "root": "src/%PROJECT_THEME_NAME%",
+      "asserts": [ ],
+      "mainTemplates": [
+        "base.twig"
+      ]
+    }
+  },
+  "build": {
+    "outputPath": "dist"
+  },
+  "defaultTheme": "%PROJECT_THEME_NAME%"
+}

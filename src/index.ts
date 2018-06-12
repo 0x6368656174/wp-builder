@@ -3,11 +3,13 @@
 import * as yargs from 'yargs';
 
 import * as buildCommand from './build.command';
+import * as initCommand from './init.command';
 import * as serveCommand from './serve.command';
 
 yargs.usage('Usage: $0 [command]')
   .command(buildCommand)
   .command(serveCommand)
+  .command(initCommand)
   .version('1.0.0')
   .locale('en')
   .help('help')

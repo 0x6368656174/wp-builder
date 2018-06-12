@@ -164,6 +164,16 @@ export function webpackConfig(params: IConfigParams): Configuration {
           ),
         },
         {
+          exclude: /(node_modules|bower_components)/,
+          test: /\.js$/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: ['@babel/preset-env'],
+            },
+          },
+        },
+        {
           test: /\.ts$/,
           use: [
             {

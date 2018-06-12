@@ -1,6 +1,6 @@
 {
   "name": "@0x6368656174/wp-builder",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "WordPress CLI for fast build modern site",
   "main": "index.js",
   "repository": "https://github.com/0x6368656174/wp-builder",
@@ -12,6 +12,11 @@
   },
   "dependencies": {
     "@types/clean-webpack-plugin": "^0.1.2",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.7.0",
+    "camelcase": "^5.0.0",
+    "canvas": "^1.6.11",
     "clean-webpack-plugin": "^0.1.19",
     "copy-webpack-plugin": "^4.5.1",
     "css-loader": "^0.28.11",
@@ -37,6 +42,7 @@
     "yargs": "^11.0.0"
   },
   "devDependencies": {
+    "@types/camelcase": "^4.1.0",
     "@types/copy-webpack-plugin": "^4.4.1",
     "@types/extract-text-webpack-plugin": "^3.0.3",
     "@types/glob": "^5.0.35",

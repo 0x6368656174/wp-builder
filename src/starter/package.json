@@ -1,0 +1,24 @@
+{
+  "name": "%PROJECT_NAME%",
+  "description": "%PROJECT_DESCRIPTION%",
+  "author": "%AUTHOR_NAME% <%AUTHOR_EMAIL%>",
+  "private": true,
+  "scripts": {
+    "serve": "wpbuild serve",
+    "build": "wpbuild build --prod",
+    "pack": "tar --exclude='dist/wp-content/uploads' -czf dist.tar.gz dist"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.3.2",
+    "stylelint": "^9.2.1",
+    "stylelint-config-sass-guidelines": "^5.0.0",
+    "stylelint-order": "^0.8.1",
+    "stylelint-scss": "^3.1.0",
+    "tslint": "^5.10.0",
+    "typescript": "^2.9.1",
+    "eslint": "^4.19.1"
+  },
+  "dependencies": {
+    "jquery": "^3.3.1"
+  }
+}

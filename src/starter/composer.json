@@ -1,0 +1,64 @@
+{
+  "name": "%PROJECT_NAME%",
+  "type": "project",
+  "description": "%PROJECT_DESCRIPTION%",
+  "homepage": "%PROJECT_HOME_PAGE%",
+  "scripts": {
+    "post-update-cmd": [
+      "ComposerScripts\\InstallHooks::localConf"
+    ],
+    "post-install-cmd": [
+      "ComposerScripts\\InstallHooks::localConf"
+    ]
+  },
+  "autoload": {
+    "psr-4": {
+      "ComposerScripts\\": "composer/ComposerScripts/",
+      "%PROJECT_THEME_NAME_PASCAL_CASE%\\": "dist/wp-content/themes/%PROJECT_THEME_NAME%/"
+    }
+  },
+  "authors": [
+    {
+      "name": "%AUTHOR_NAME%",
+      "email": "%AUTHOR_EMAIL%",
+      "homepage": "%AUTHOR_HOME_PAGE%"
+    }
+  ],
+  "keywords": [
+    "wordpress", "twig"
+  ],
+  "config": {
+    "vendor-dir": "dist/vendor",
+    "bin-dir": "dist/vendor/bin",
+    "preferred-install": "dist"
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org"
+    },
+    {
+      "type": "composer",
+      "url": "https://wp-languages.github.io"
+    }
+  ],
+  "require": {
+    "php": ">=7.0.0",
+    "composer/installers": "*",
+    "johnpbloch/wordpress": "*",
+    "timber/timber": "*",
+    "koodimonni-language/core-ru_ru": "*"
+  },
+  "extra": {
+    "installer-paths": {
+      "dist/wp-content/plugins/{$name}/": ["type:wordpress-plugin"],
+      "dist/wp-content/mu-plugins/{$name}/": ["type:wordpress-muplugin"],
+      "dist/wp-content/themes/{$name}": ["type:wordpress-theme"]
+    },
+    "dropin-paths": {
+      "dist/wp-content/languages/": ["type:wordpress-language"],
+      "dist/wp-content/languages/plugins/": ["vendor:wordpress-plugin-language"]
+    },
+    "wordpress-install-dir": "dist/wordpress"
+  }
+}
