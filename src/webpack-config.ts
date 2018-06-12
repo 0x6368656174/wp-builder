@@ -6,11 +6,11 @@ import { existsSync, readFileSync } from 'fs';
 import * as glob from 'glob';
 import * as ExtractCssPlugin from 'mini-css-extract-plugin';
 import { join, resolve } from 'path';
-import * as postcssCssNext from 'postcss-cssnext';
-import { SuppressChunksPlugin } from './suppress-chunks.plugin';
+import * as postcssPresetEnv from 'postcss-preset-env';
 import { Configuration } from 'webpack';
 import * as webpack from 'webpack';
 import { readConfig } from './config-read';
+import { SuppressChunksPlugin } from './suppress-chunks.plugin';
 import { version } from './version';
 
 interface IConfigParams {
@@ -45,7 +45,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
   });
 
   const postcssCssNextPlugins = [
-    (postcssCssNext as any)(),
+    (postcssPresetEnv as any)(),
   ];
 
   if (!isDevelopment) {
@@ -162,16 +162,6 @@ export function webpackConfig(params: IConfigParams): Configuration {
               ],
             },
           ),
-        },
-        {
-          exclude: /(node_modules|bower_components)/,
-          test: /\.js$/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              presets: ['@babel/preset-env'],
-            },
-          },
         },
         {
           test: /\.ts$/,
