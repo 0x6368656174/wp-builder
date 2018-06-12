@@ -138,7 +138,7 @@ function runCommand(commandStr: string, options: string[], cwd: string): Promise
 
 function createScreenshot(dir: string, projectThemeName: string) {
   return new Promise(resolve => {
-    const canvas = new (Canvas as any)(1200, 900);
+    const canvas = (Canvas as any).createCanvas(1200, 900);
     const ctx = canvas.getContext('2d');
 
     ctx.fillStyle = 'white';
@@ -157,7 +157,7 @@ function createScreenshot(dir: string, projectThemeName: string) {
     });
 
     screenshotStream.on('end', () => {
-      process.stdout.write('Created screenshot.png');
+      process.stdout.write('Created screenshot.png\n');
       resolve();
     });
   });
