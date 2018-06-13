@@ -12,6 +12,7 @@ before_script:
   - cp src/router.php dist
   - cp README.md dist
   - cp LICENSE dist
+  - cp -r src/starter dist
   - cd dist
 
 script:
