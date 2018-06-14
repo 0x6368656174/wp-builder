@@ -11,11 +11,6 @@ export const command = 'init';
 export const describe = 'Init new project';
 export const builder: {[key: string]: Options} = { };
 
-interface IArgv {
-  prod: boolean;
-  theme?: string;
-}
-
 const rl = createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -35,7 +30,7 @@ async function question(query: string, defaultValue?: string): Promise<string> {
   }
 }
 
-export async function handler(argv: IArgv) {
+export async function handler() {
   const projectName = await question('Project name [my-project]: ', 'my-project');
   const projectThemeName = await question(`Project theme name [${projectName}-theme]: `, projectName + '-theme');
    // FIXME: Убрать any, когда починят definition
@@ -89,14 +84,14 @@ export async function handler(argv: IArgv) {
     const newFileFullPath = join(dir, newFilePath);
     const fileContent = readFileSync(file, 'utf-8');
     const newFileContent = fileContent
-      .replace(/\%PROJECT_NAME\%/g, projectName)
-      .replace(/\%PROJECT_THEME_NAME\%/g, projectThemeName)
-      .replace(/\%PROJECT_THEME_NAME_PASCAL_CASE\%/g, projectThemeNamePascalCase)
-      .replace(/\%PROJECT_DESCRIPTION\%/g, projectDescription)
-      .replace(/\%PROJECT_HOME_PAGE\%/g, projectHomePage)
-      .replace(/\%AUTHOR_NAME\%/g, authorName)
-      .replace(/\%AUTHOR_EMAIL\%/g, authorEmail)
-      .replace(/\%AUTHOR_HOME_PAGE\%/g, authorHomePage);
+      .replace(/%PROJECT_NAME%/g, projectName)
+      .replace(/%PROJECT_THEME_NAME%/g, projectThemeName)
+      .replace(/%PROJECT_THEME_NAME_PASCAL_CASE%/g, projectThemeNamePascalCase)
+      .replace(/%PROJECT_DESCRIPTION%/g, projectDescription)
+      .replace(/%PROJECT_HOME_PAGE%/g, projectHomePage)
+      .replace(/%AUTHOR_NAME%/g, authorName)
+      .replace(/%AUTHOR_EMAIL%/g, authorEmail)
+      .replace(/%AUTHOR_HOME_PAGE%/g, authorHomePage);
 
     writeFileSync(newFileFullPath, newFileContent);
     process.stdout.write(`Created file ${newFileFullPath}\n`);
