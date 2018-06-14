@@ -1,10 +1,10 @@
 import * as camelcase from 'camelcase';
-import * as Canvas from 'canvas';
 import { spawn } from 'child_process';
-import { createWriteStream, lstatSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { lstatSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import * as glob from 'glob';
-import { join, relative } from 'path';
+import { basename, join, relative } from 'path';
 import { createInterface } from 'readline';
+import * as svg2png from 'svg2png';
 import { Options } from 'yargs';
 
 export const command = 'init';
@@ -83,7 +83,9 @@ export async function handler(argv: IArgv) {
   }
 
   for (const file of files) {
-    const newFilePath = relative(join(__dirname, 'starter'), file).replace('%PROJECT_THEME_NAME%', projectThemeName);
+    const newFileName = basename(file) !== '_gitignore' ? file : file.replace('_gitignore', '.gitignore');
+    const newFilePath = relative(join(__dirname, 'starter'), newFileName)
+      .replace('%PROJECT_THEME_NAME%', projectThemeName);
     const newFileFullPath = join(dir, newFilePath);
     const fileContent = readFileSync(file, 'utf-8');
     const newFileContent = fileContent
@@ -136,31 +138,16 @@ function runCommand(commandStr: string, options: string[], cwd: string): Promise
   });
 }
 
-function createScreenshot(dir: string, projectThemeName: string) {
-  return new Promise(resolve => {
-    const canvas = (Canvas as any).createCanvas(1200, 900);
-    const ctx = canvas.getContext('2d');
+async function createScreenshot(dir: string, projectThemeName: string) {
+  const svgBuffer = new Buffer(`<svg>
+    <rect width="100%" height="100%" fill="white"/>
+    <text y="450" font-size="30" font-family="Arial, sans-serif">
+       <tspan x="600" text-anchor="middle">${projectThemeName}</tspan>
+   </text>
+</svg>`);
 
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = 'black';
-    ctx.font = '30px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(projectThemeName, canvas.width / 2, canvas.height / 2);
-
-    const screenshotOut = createWriteStream(join(dir, 'src', projectThemeName, 'screenshot.png'));
-    const screenshotStream = canvas.pngStream();
-
-    screenshotStream.on('data', (chunk: ArrayBuffer) => {
-      screenshotOut.write(chunk);
-    });
-
-    screenshotStream.on('end', () => {
-      process.stdout.write('Created screenshot.png\n');
-      resolve();
-    });
-  });
+  const pngBuffer = await svg2png(svgBuffer, { width: 1200, height: 900 });
+  writeFileSync(join(dir, 'src', projectThemeName, 'screenshot.png'), pngBuffer);
 }
 
 interface IConfigureDb {
