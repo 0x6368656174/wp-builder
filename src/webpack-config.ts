@@ -164,6 +164,19 @@ export function webpackConfig(params: IConfigParams): Configuration {
           ),
         },
         {
+          exclude: /(node_modules|bower_components)/,
+          test: /\.js$/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              cacheDirectory: true,
+              plugins: ['@babel/plugin-transform-runtime'].map((require as any).resolve),
+              presets: ['@babel/preset-env'].map((require as any).resolve),
+            },
+          },
+        },
+        {
           test: /\.ts$/,
           use: [
             {
