@@ -1,7 +1,18 @@
 <?php
 
+function toWebPack($url) {
+  $themeRx = '/^\/wp-content\/themes\//i';
+  $webPackDevServerRx = '/^\/webpack-dev-server/i';
+  if (preg_match($themeRx, $url)) {
+    return true;
+  }
+  if (preg_match($webPackDevServerRx, $url)) {
+    return true;
+  }
+}
+
 // Если запрашиваем данные из темы, то вернем их из WebPack Dev Server
-if (substr($_SERVER["REQUEST_URI"], 0,32) == '/wp-content/themes/%THEME%') {
+if (toWebPack($_SERVER["REQUEST_URI"])) {
   $url = $_SERVER['REQUEST_URI'];
 
   $path = parse_url($url, PHP_URL_PATH);
