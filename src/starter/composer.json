@@ -47,7 +47,8 @@
     "composer/installers": "*",
     "johnpbloch/wordpress": "*",
     "timber/timber": "*",
-    "koodimonni-language/core-ru_ru": "*"
+    "koodimonni-language/core-ru_ru": "*",
+    "hellonico/timber-dump-extension": "*"
   },
   "extra": {
     "installer-paths": {
