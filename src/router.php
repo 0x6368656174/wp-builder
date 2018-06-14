@@ -47,7 +47,7 @@ if (toWebPack($_SERVER["REQUEST_URI"])) {
       header($header);
     }
   }
-  header('From-Webpack: true');
+  header('X-Powered-By: Webpack');
 
   echo $contents;
   return true;
