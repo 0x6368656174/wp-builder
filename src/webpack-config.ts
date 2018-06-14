@@ -1,5 +1,7 @@
 import * as CleanWebpackPlugin from 'clean-webpack-plugin';
 import * as CopyWebpackPlugin from 'copy-webpack-plugin';
+import { CreateSplitChunksImportTemplatePlugin } from './create-split-chunks-import-template.plugin';
+import { JqueryDepedensePlugin } from './jquery-depedense.plugin';
 import * as cssnano from 'cssnano';
 import * as ExtractTextPlugin from 'extract-text-webpack-plugin';
 import { existsSync, readFileSync } from 'fs';
@@ -171,8 +173,8 @@ export function webpackConfig(params: IConfigParams): Configuration {
             options: {
               babelrc: false,
               cacheDirectory: true,
-              plugins: ['@babel/plugin-transform-runtime'].map((require as any).resolve),
-              presets: ['@babel/preset-env'].map((require as any).resolve),
+              plugins: ['@babel/plugin-transform-runtime'],
+              presets: ['@babel/preset-env'],
             },
           },
         },
@@ -283,6 +285,8 @@ export function webpackConfig(params: IConfigParams): Configuration {
         test: /^style.css/,
       }),
       new SuppressChunksPlugin(),
+      new CreateSplitChunksImportTemplatePlugin(),
+      new JqueryDepedensePlugin(),
       new CopyWebpackPlugin([
         ...getAsserts(),
         {
@@ -295,7 +299,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
         },
       ]),
       new CleanWebpackPlugin([outputPath], {root: join(process.cwd(), wpConfig.build.outputPath), verbose: false}),
-      // Добавим глобальный объявления для jQuery
+      // // Добавим глобальный объявления для jQuery
       new webpack.ProvidePlugin({
         '$'                : 'jquery',
         'jQuery'           : 'jquery',
