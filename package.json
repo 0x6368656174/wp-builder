@@ -7,6 +7,11 @@
   "author": "Pavel Puchkov <0x6368656174@gmail.com>",
   "license": "LGPL-3.0",
   "private": false,
+  "scripts": {
+    "build": "node_modules/.bin/tsc",
+    "version": "npm run build",
+    "postversion": "node utils/postversion.js $npm_package_version && git add src/starter/package.json && git commit -m 'patch starter package.json' && git push && git push --tags"
+  },
   "bin": {
     "wpbuild": "index.js"
   },
