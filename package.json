@@ -9,7 +9,8 @@
   "private": false,
   "scripts": {
     "build": "node_modules/.bin/tsc",
-    "postversion": "node utils/postversion.js $npm_package_version && git add src/starter/package.json && git commit -m 'patch starter package.json' && git push && git push --tags"
+    "version": "node utils/version.js $npm_package_version && git add src/index.ts src/starter/package.json && git commit -m 'patch new version'",
+    "postversion": "git push && git push --tags"
   },
   "bin": {
     "wpbuild": "index.js"
