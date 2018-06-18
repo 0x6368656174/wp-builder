@@ -6,18 +6,24 @@
   "scripts": {
     "serve": "node_modules/.bin/wpbuild serve",
     "build": "node_modules/.bin/wpbuild build --prod",
-    "pack": "tar --exclude='dist/wp-content/uploads' -czf dist.tar.gz dist"
+    "pack": "tar --exclude='dist/wp-content/uploads' -czf dist.tar.gz dist",
+    "precommit": "lint-staged",
+    "postcommit": "git update-index --again"
+  },
+  "lint-staged": {
+    "*.{css,scss,sass,js,ts,json,gql,md}": ["wpbuild prettify", "wpbuild lint --fix", "git add"]
   },
   "devDependencies": {
-    "@types/jquery": "^3.3.2",
     "@0x6368656174/wp-builder": "^1.0.18",
-    "stylelint": "^9.2.1",
+    "@types/jquery": "^3.3.2",
+    "eslint": "^4.19.1",
+    "lint-staged": "^7.2.0",
+    "husky": "^0.14.3",
+    "stylelint": "^9.3.0",
     "stylelint-config-sass-guidelines": "^5.0.0",
     "stylelint-order": "^0.8.1",
-    "stylelint-scss": "^3.1.0",
-    "tslint": "^5.10.0",
-    "typescript": "^2.9.1",
-    "eslint": "^4.19.1"
+    "stylelint-scss": "^3.1.3",
+    "tslint": "^5.10.0"
   },
   "dependencies": {
     "jquery": "^3.3.1"
