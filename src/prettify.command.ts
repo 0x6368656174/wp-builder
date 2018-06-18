@@ -1,7 +1,7 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import * as glob from 'glob';
 import { extname, isAbsolute, join } from 'path';
-import { format } from 'prettier';
+import { format, Options as PrettierOptions } from 'prettier';
 import { Options } from 'yargs';
 
 interface IArgv {
@@ -43,6 +43,18 @@ export async function handler({ files }: IArgv) {
     return isAbsolute(file) ? file : join(process.cwd(), file);
   });
 
+  let options: PrettierOptions = {
+    arrowParens: 'avoid',
+    printWidth: 120,
+    singleQuote: true,
+    trailingComma: 'all',
+  };
+
+  const optionsFile = join(process.cwd(), '.prettierrc');
+  if (existsSync(optionsFile)) {
+    options = JSON.parse(readFileSync(optionsFile, 'utf-8'));
+  }
+
   for (const file of files) {
     const data = readFileSync(file, 'utf-8');
 
@@ -68,13 +80,9 @@ export async function handler({ files }: IArgv) {
         break;
     }
 
-    const newData = format(data, {
-      arrowParens: 'avoid',
-      parser,
-      printWidth: 120,
-      singleQuote: true,
-      trailingComma: 'all',
-    });
+    options.parser = parser;
+
+    const newData = format(data, options);
     if (data !== newData) {
       process.stdout.write(`File ${file} reformatted\n`);
       writeFileSync(file, newData);

@@ -3,7 +3,9 @@ import * as glob from 'glob';
 import { extname, isAbsolute, join } from 'path';
 import { lint } from 'stylelint';
 import { Options } from 'yargs';
+import {readConfig} from './config-read';
 
+import {existsSync} from 'fs';
 interface IArgv {
   files: string[];
   fix: boolean;
@@ -27,8 +29,12 @@ export const builder: { [key: string]: Options } = {
 
 async function lintStyles(styles: string[], fix: boolean): Promise<boolean> {
   process.stdout.write('LINT STYLES...\n');
+
+  const defaultConfigFile = join(__dirname, 'starter', '.stylelintrc');
+  const configFile = join(process.cwd(), '.stylelintrc');
+
   const result = await lint({
-    configFile: join(__dirname, 'starter', '.stylelintrc'),
+    configFile: existsSync(configFile) ? configFile : defaultConfigFile,
     files: styles,
     fix,
     formatter: 'string',
@@ -45,8 +51,12 @@ async function lintStyles(styles: string[], fix: boolean): Promise<boolean> {
 
 async function lintJs(js: string[], fix: boolean): Promise<boolean> {
   process.stdout.write('\nLINT JS...\n');
+
+  const defaultConfigFile = join(__dirname, 'starter', '.eslintrc');
+  const configFile = join(process.cwd(), '.eslintrc');
+
   const cli = new CLIEngine({
-    configFile: join(__dirname, 'starter', '.eslintrc'),
+    configFile: existsSync(configFile) ? configFile : defaultConfigFile,
     fix,
   });
   const result = cli.executeOnFiles(js);
