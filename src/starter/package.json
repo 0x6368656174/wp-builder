@@ -7,6 +7,8 @@
     "serve": "node_modules/.bin/wpbuild serve",
     "build": "node_modules/.bin/wpbuild build --prod",
     "pack": "tar --exclude='dist/wp-content/uploads' -czf dist.tar.gz dist",
+    "lint": "wpbuild lint",
+    "fix": "wpbuild prettify && wpbuild lint --fix",
     "precommit": "lint-staged",
     "postcommit": "git update-index --again"
   },
