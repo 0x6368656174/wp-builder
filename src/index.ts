@@ -4,12 +4,16 @@ import * as yargs from 'yargs';
 
 import * as buildCommand from './build.command';
 import * as initCommand from './init.command';
+import * as lintCommand from './lint.command';
+import * as prettifyCommand from './prettify.command';
 import * as serveCommand from './serve.command';
 
 const argv = yargs.usage('Usage: $0 [command]')
   .command(buildCommand)
   .command(serveCommand)
   .command(initCommand)
+  .command(lintCommand)
+  .command(prettifyCommand)
   .version('1.0.15')
   .locale('en')
   .help('help')
