@@ -50,7 +50,7 @@ export async function handler() {
   }
   rl.close();
 
-  const globResult = glob.sync(join(__dirname, 'starter', '**/*'), { dot: true });
+  const globResult = glob.sync(join(__dirname, '..', 'starter', '**/*'), { dot: true });
   const directories = globResult.filter(file => {
     const stat = lstatSync(file);
     return stat.isDirectory();
@@ -65,7 +65,7 @@ export async function handler() {
   process.stdout.write(`Created directory ${dir}\n`);
 
   for (const directory of directories) {
-    const newDirPath = relative(join(__dirname, 'starter'), directory)
+    const newDirPath = relative(join(__dirname, '..', 'starter'), directory)
       .replace('%PROJECT_THEME_NAME%', projectThemeName);
     const newDirFullPath = join(dir, newDirPath);
     mkdirSync(newDirFullPath);
@@ -74,7 +74,7 @@ export async function handler() {
 
   for (const file of files) {
     const newFileName = basename(file) !== '_gitignore' ? file : file.replace('_gitignore', '.gitignore');
-    const newFilePath = relative(join(__dirname, 'starter'), newFileName)
+    const newFilePath = relative(join(__dirname, '..', 'starter'), newFileName)
       .replace('%PROJECT_THEME_NAME%', projectThemeName);
     const newFileFullPath = join(dir, newFilePath);
     const fileContent = readFileSync(file, 'utf-8');

@@ -28,7 +28,7 @@ interface ICreateRouterParams {
 }
 
 function createRouterPhp(params: ICreateRouterParams): string {
-  let routerData = readFileSync(join(__dirname, 'router.php'), 'utf-8');
+  let routerData = readFileSync(join(__dirname, '..', 'router.php'), 'utf-8');
   routerData = routerData.replace('%THEME%', params.theme);
   routerData = routerData.replace('%HOST%', params.host);
   routerData = routerData.replace('%UPDATE_PORT%', params.updatePort.toString());
