@@ -14,7 +14,7 @@
     "*.{css,scss,sass,js,ts,json,gql,md}": ["wpbuild prettify", "wpbuild lint --fix", "git add"]
   },
   "devDependencies": {
-    "@0x6368656174/wp-builder": "^1.0.18",
+    "@0x6368656174/wp-builder": "^1.0.19",
     "@types/jquery": "^3.3.2",
     "eslint": "^4.19.1",
     "lint-staged": "^7.2.0",
