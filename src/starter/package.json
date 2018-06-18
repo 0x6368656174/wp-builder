@@ -13,7 +13,7 @@
     "postcommit": "git update-index --again"
   },
   "devDependencies": {
-    "@0x6368656174/wp-builder": "^1.0.21",
+    "@0x6368656174/wp-builder": "^1.0.22",
     "@types/jquery": "^3.3.2"
   },
   "dependencies": {
