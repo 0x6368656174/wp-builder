@@ -1,6 +1,6 @@
 {
   "name": "@0x6368656174/wp-builder",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "WordPress CLI for fast build modern site",
   "main": "index.js",
   "repository": "https://github.com/0x6368656174/wp-builder",
