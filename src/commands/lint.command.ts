@@ -14,6 +14,11 @@ export const builder: { [key: string]: Options } = {
     description: 'Fix errors',
     type: 'boolean',
   },
+  showAll: {
+    default: false,
+    description: 'Show all processed files',
+    type: 'boolean',
+  },
 };
 export async function handler(argv: any) {
   const run = require('./lint.command-handler');

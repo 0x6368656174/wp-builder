@@ -5,9 +5,10 @@ import { format, Options as PrettierOptions } from 'prettier';
 
 interface IArgv {
   files?: string[];
+  showAll: boolean;
 }
 
-export async function handler({ files }: IArgv) {
+export async function handler({ files, showAll }: IArgv) {
   if (!files || files.length === 0) {
     files = glob.sync(join(process.cwd(), 'src', '**/*'));
   }
@@ -43,6 +44,8 @@ export async function handler({ files }: IArgv) {
     options = JSON.parse(readFileSync(optionsFile, 'utf-8'));
   }
 
+  let onceReformatted = false;
+
   for (const file of files) {
     const data = readFileSync(file, 'utf-8');
 
@@ -74,9 +77,17 @@ export async function handler({ files }: IArgv) {
     if (data !== newData) {
       process.stdout.write(`File ${file} reformatted\n`);
       writeFileSync(file, newData);
+      onceReformatted = true;
     } else {
-      process.stdout.write(`File ${file} already looks good👌\n`);
+      if (showAll) {
+        process.stdout.write(`File ${file} already looks good👌\n`);
+      }
     }
+
+  }
+
+  if (!showAll && !onceReformatted) {
+    process.stdout.write(`All files already looks good👌\n`);
   }
 
   process.exit(0);
