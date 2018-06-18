@@ -2,15 +2,10 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import * as glob from 'glob';
 import { extname, isAbsolute, join } from 'path';
 import { format, Options as PrettierOptions } from 'prettier';
-import { Options } from 'yargs';
 
 interface IArgv {
   files?: string[];
 }
-
-export const command = 'prettify [files..]';
-export const describe = 'Prettify project style';
-export const builder: { [key: string]: Options } = {};
 
 export async function handler({ files }: IArgv) {
   if (!files || files.length === 0) {

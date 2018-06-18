@@ -7,4 +7,4 @@ export const statsConfig = {
   colors: true,
   entrypoints: false,
   modules: false,
-}
+};

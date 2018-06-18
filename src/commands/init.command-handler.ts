@@ -5,11 +5,6 @@ import * as glob from 'glob';
 import { basename, join, relative } from 'path';
 import { createInterface } from 'readline';
 import * as svg2png from 'svg2png';
-import { Options } from 'yargs';
-
-export const command = 'init';
-export const describe = 'Init new project';
-export const builder: {[key: string]: Options} = { };
 
 const rl = createInterface({
   input: process.stdin,

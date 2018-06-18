@@ -1,45 +1,13 @@
 import { spawn } from 'child_process';
-import { openSync, readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import * as webpack from 'webpack';
 import * as WebpackDevServer from 'webpack-dev-server';
 import * as WriteFileWebpackPlugin from 'write-file-webpack-plugin';
-import { Options } from 'yargs';
-import { readConfig } from './config-read';
-import { statsConfig } from './stats';
-import { webpackConfig } from './webpack-config';
-
-export const command = 'serve';
-export const describe = 'Run site local';
-export const builder: {[key: string]: Options} = {
-  host: {
-    default: 'localhost',
-    describe: 'Host',
-    type: 'string',
-  },
-  port: {
-    default: 4200,
-    describe: 'Port',
-    type: 'number',
-  },
-  prod: {
-    alias: 'p',
-    default: false,
-    describe: 'Build in production mode',
-    type: 'boolean',
-  },
-  theme: {
-    alias: 't',
-    describe: 'Theme for build',
-    type: 'string',
-  },
-  updatePort: {
-    default: 4201,
-    describe: 'Port for webpack live update server',
-    type: 'number',
-  },
-};
+import { readConfig } from '../config-read';
+import { statsConfig } from '../stats';
+import { webpackConfig } from '../webpack-config';
 
 interface IArgv {
   host: string;

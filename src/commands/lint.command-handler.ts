@@ -2,7 +2,6 @@ import { CLIEngine } from 'eslint';
 import * as glob from 'glob';
 import { extname, isAbsolute, join } from 'path';
 import { lint } from 'stylelint';
-import { Options } from 'yargs';
 
 import { existsSync } from 'fs';
 interface IArgv {
@@ -10,26 +9,10 @@ interface IArgv {
   fix: boolean;
 }
 
-export const command = 'lint [files..]';
-export const describe = 'Lint project';
-export const builder: { [key: string]: Options } = {
-  files: {
-    alias: 'f',
-    default: [],
-    description: 'Files to lint',
-    type: 'array',
-  },
-  fix: {
-    default: false,
-    description: 'Fix errors',
-    type: 'boolean',
-  },
-};
-
 async function lintStyles(styles: string[], fix: boolean): Promise<boolean> {
   process.stdout.write('LINT STYLES...\n');
 
-  const defaultConfigFile = join(__dirname, 'starter', '.stylelintrc');
+  const defaultConfigFile = join(__dirname, '..', 'starter', '.stylelintrc');
   const configFile = join(process.cwd(), '.stylelintrc');
 
   const result = await lint({
@@ -51,7 +34,7 @@ async function lintStyles(styles: string[], fix: boolean): Promise<boolean> {
 async function lintJs(js: string[], fix: boolean): Promise<boolean> {
   process.stdout.write('\nLINT JS...\n');
 
-  const defaultConfigFile = join(__dirname, 'starter', '.eslintrc');
+  const defaultConfigFile = join(__dirname, '..', 'starter', '.eslintrc');
   const configFile = join(process.cwd(), '.eslintrc');
 
   const cli = new CLIEngine({
