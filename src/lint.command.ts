@@ -3,7 +3,6 @@ import * as glob from 'glob';
 import { extname, isAbsolute, join } from 'path';
 import { lint } from 'stylelint';
 import { Options } from 'yargs';
-import {readConfig} from './config-read';
 
 import {existsSync} from 'fs';
 interface IArgv {
