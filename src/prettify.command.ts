@@ -5,22 +5,15 @@ import { format, Options as PrettierOptions } from 'prettier';
 import { Options } from 'yargs';
 
 interface IArgv {
-  files: string[];
+  files?: string[];
 }
 
-export const command = 'prettify';
+export const command = 'prettify [files..]';
 export const describe = 'Prettify project style';
-export const builder: { [key: string]: Options } = {
-  files: {
-    alias: 'f',
-    default: [],
-    description: 'Files to prettify',
-    type: 'array',
-  },
-};
+export const builder: { [key: string]: Options } = {};
 
 export async function handler({ files }: IArgv) {
-  if (files.length === 0) {
+  if (!files || files.length === 0) {
     files = glob.sync(join(process.cwd(), 'src', '**/*'));
   }
 

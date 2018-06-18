@@ -4,13 +4,13 @@ import { extname, isAbsolute, join } from 'path';
 import { lint } from 'stylelint';
 import { Options } from 'yargs';
 
-import {existsSync} from 'fs';
+import { existsSync } from 'fs';
 interface IArgv {
-  files: string[];
+  files?: string[];
   fix: boolean;
 }
 
-export const command = 'lint';
+export const command = 'lint [files..]';
 export const describe = 'Lint project';
 export const builder: { [key: string]: Options } = {
   files: {
@@ -75,7 +75,7 @@ async function lintJs(js: string[], fix: boolean): Promise<boolean> {
 }
 
 export async function handler({ files, fix }: IArgv) {
-  if (files.length === 0) {
+  if (!files || files.length === 0) {
     files = glob.sync(join(process.cwd(), 'src', '**/*'));
   }
 
