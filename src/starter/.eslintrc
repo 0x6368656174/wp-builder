@@ -1,5 +1,5 @@
 {
-  "extends": "eslint:recommended",
+  "extends": ["eslint:recommended", "google"],
   "parserOptions": {
     "ecmaVersion": 9,
     "sourceType": "module"
@@ -10,11 +10,8 @@
     "jquery": true
   },
   "rules": {
-    "quotes": [
-      "error",
-      "single"
-    ],
-    "no-console": "off",
+    "arrow-parens": ["error", "as-needed"],
+    "array-callback-return": "error",
     "max-len": [
       "error",
       {
@@ -22,7 +19,13 @@
         "tabWidth": 2
       }
     ],
-    "no-var": "error",
-    "arrow-parens": ["error", "as-needed"]
+    "no-console": "off",
+    "no-useless-concat": "error",
+    "object-shorthand": "error",
+    "prefer-arrow-callback": "error",
+    "prefer-const": "error",
+    "prefer-template": "error",
+    "require-jsdoc": "off",
+    "template-curly-spacing": "error"
   }
 }

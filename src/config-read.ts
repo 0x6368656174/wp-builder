@@ -12,6 +12,7 @@ interface ITheme {
 }
 
 interface IConfig {
+  project: string;
   build: IBuild;
   themes: {
     [name: string]: ITheme;

@@ -1,4 +1,4 @@
-import { writeFileSync } from 'fs';
+import { existsSync, writeFileSync } from 'fs';
 import * as mkdirp from 'make-dir';
 import { basename, extname, join } from 'path';
 import { Compiler } from 'webpack';
@@ -39,8 +39,11 @@ add_action( 'wp_enqueue_scripts', function () {
 });`;
 
       const outputPath = (compiler.options.output || {}).path || '';
-      await mkdirp(join(outputPath, 'functions.php.d'));
-      writeFileSync(join(outputPath, 'functions.php.d', '_JQuery.php'), php);
+      const functionsFolder = join(outputPath, 'functions.php.d');
+      if (!existsSync(functionsFolder)) {
+        await mkdirp(functionsFolder);
+      }
+      writeFileSync(join(functionsFolder, '_JQuery.php'), php);
       return true;
     });
   }

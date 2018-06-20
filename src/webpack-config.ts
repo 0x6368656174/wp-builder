@@ -285,7 +285,6 @@ export function webpackConfig(params: IConfigParams): Configuration {
         test: /^style.css/,
       }),
       new SuppressChunksPlugin(),
-      new CreateSplitChunksImportTemplatePlugin(),
       new JqueryDepedensePlugin(),
       new CopyWebpackPlugin([
         ...getAsserts(),
@@ -299,6 +298,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
         },
       ]),
       new CleanWebpackPlugin([outputPath], {root: join(process.cwd(), wpConfig.build.outputPath), verbose: false}),
+      new CreateSplitChunksImportTemplatePlugin(),
       // // Добавим глобальный объявления для jQuery
       new webpack.ProvidePlugin({
         '$'                : 'jquery',

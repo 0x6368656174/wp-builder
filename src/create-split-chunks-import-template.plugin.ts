@@ -1,4 +1,4 @@
-import { writeFileSync } from 'fs';
+import { existsSync, writeFileSync } from 'fs';
 import * as mkdirp from 'make-dir';
 import { join } from 'path';
 import { Compiler } from 'webpack';
@@ -29,15 +29,18 @@ export class CreateSplitChunksImportTemplatePlugin {
       }
 
       const twig = js
-          .map(script => `<script type="text/javascript" src="{{ theme.path }}/${script}${versionString}" defer></script>`)
+          .map(script => `<script type="text/javascript" src="{{ site.link }}/{{ theme.path }}/${script}${versionString}" defer></script>`)
           .join('\n')
         + css
-          .map(style => `<link rel="stylesheet"  type="text/css" href="{{ theme.path }}/${style}${versionString}">`)
+          .map(style => `<link rel="stylesheet"  type="text/css" href="{{ site.link }}/{{ theme.path }}/${style}${versionString}">`)
           .join('\n');
 
       const outputPath = (compiler.options.output || {}).path || '';
-      await mkdirp(join(outputPath, 'views'));
-      writeFileSync(join(outputPath, 'views', '_split-chunks.twig'), twig);
+      const viewsFolder = join(outputPath, 'views');
+      if (!existsSync(viewsFolder)) {
+        await mkdirp(viewsFolder);
+      }
+      writeFileSync(join(viewsFolder, '_split-chunks.twig'), twig);
       return true;
     });
   }

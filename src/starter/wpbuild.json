@@ -1,4 +1,5 @@
 {
+  "project": "%PROJECT_NAME%",
   "themes": {
     "%PROJECT_THEME_NAME%": {
       "root": "src/%PROJECT_THEME_NAME%",
