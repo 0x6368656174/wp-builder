@@ -19,6 +19,7 @@ export async function handler({ files, showAll }: IArgv) {
       case '.css':
       case '.scss':
       case '.sass':
+      case '.js':
       case '.ts':
       case '.md':
       case '.json':
