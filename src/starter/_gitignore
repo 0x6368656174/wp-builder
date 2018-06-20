@@ -4,6 +4,7 @@
 # Temp files
 *~
 *.tpm
+.php_cs.cache
 
 # Outputs
 /dist
