@@ -12,6 +12,7 @@
   "rules": {
     "arrow-parens": ["error", "as-needed"],
     "array-callback-return": "error",
+    "eqeqeq": "error",
     "max-len": [
       "error",
       {
