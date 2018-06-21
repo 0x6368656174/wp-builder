@@ -15,6 +15,7 @@ interface IArgv {
   updatePort: number;
   prod: boolean;
   theme?: string;
+  deployUrl?: string;
 }
 
 function getRandomInt(min: number, max: number) {
@@ -52,7 +53,7 @@ export function handler(argv: IArgv) {
   php.stdout.on('data', data => process.stdout.write(`PHP: ${data}`));
   php.stderr.on('data', data => process.stderr.write(`PHP: ${data}`));
 
-  const wpConfig = webpackConfig({mode, theme, serve: true});
+  const wpConfig = webpackConfig({mode, theme, serve: true, deployUrl: argv.deployUrl});
   if (!wpConfig.plugins) {
     wpConfig.plugins = [];
   }

@@ -5,7 +5,7 @@ import * as ExtractTextPlugin from 'extract-text-webpack-plugin';
 import { existsSync, readFileSync } from 'fs';
 import * as glob from 'glob';
 import * as ExtractCssPlugin from 'mini-css-extract-plugin';
-import { join, resolve } from 'path';
+import { join, normalize, resolve } from 'path';
 import * as postcssPresetEnv from 'postcss-preset-env';
 import { Configuration } from 'webpack';
 import * as webpack from 'webpack';
@@ -21,6 +21,7 @@ interface IConfigParams {
   mode: 'development' | 'production';
   serve?: boolean;
   theme?: string;
+  deployUrl?: string;
 }
 
 export function webpackConfig(params: IConfigParams): Configuration {
@@ -273,7 +274,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
     output: {
       filename: '[name].js',
       path: outputPath,
-      publicPath: outputPublicPath,
+      publicPath: params.deployUrl ? normalize(join('/', params.deployUrl, outputPublicPath)) : outputPublicPath,
     },
     performance: {
       hints: false, // Уберем предупреждения

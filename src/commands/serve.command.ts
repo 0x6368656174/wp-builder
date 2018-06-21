@@ -3,6 +3,10 @@ import { Options } from 'yargs';
 export const command = 'serve';
 export const describe = 'Run site local';
 export const builder: {[key: string]: Options} = {
+  deployUrl: {
+    describe: 'URL where files will be deployed',
+    type: 'string',
+  },
   host: {
     default: 'localhost',
     describe: 'Host',
