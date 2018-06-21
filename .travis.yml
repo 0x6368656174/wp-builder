@@ -8,7 +8,7 @@ cache: yarn
 before_script:
   - yarn install
   - npm run build
-  - cp package.json dist
+  - node utils/create-package.json.js
   - cp src/router.php dist
   - cp README.md dist
   - cp LICENSE dist
