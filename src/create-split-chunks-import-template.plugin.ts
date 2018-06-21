@@ -40,7 +40,7 @@ export class CreateSplitChunksImportTemplatePlugin {
       if (!existsSync(viewsFolder)) {
         await mkdirp(viewsFolder);
       }
-      writeFileSync(join(viewsFolder, '_split-chunks.twig'), twig);
+      writeFileSync(join(viewsFolder, '__split-chunks.twig'), twig);
       return true;
     });
   }

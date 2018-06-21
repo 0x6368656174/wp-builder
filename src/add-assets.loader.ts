@@ -81,7 +81,7 @@ module.exports = function(this: LoaderContext, content: string): string {
     content = content.replace('</head>', `${headStyles}</head>`);
 
     // Добавим vendors, runtime, common
-    content = content.replace('</head>', `{% include '_split-chunks.twig'%}\n</head>`);
+    content = content.replace('</head>', `{% include '__split-chunks.twig'%}\n</head>`);
 
   } else {
     // Для остальных шаблонов

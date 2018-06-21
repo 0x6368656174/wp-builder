@@ -27,7 +27,7 @@ deploy:
   - provider: releases
     api_key: $GITHUB_TOKEN
     file_glob: true
-    file: "wp-builder-*.tgz"
+    file: "0x6368656174-wp-builder-*.tgz"
     skip_cleanup: true
     on:
       tags: true
