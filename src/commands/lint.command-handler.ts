@@ -67,7 +67,11 @@ async function lintJs(js: string[], fix: boolean, showAll: boolean): Promise<boo
 async function lintPhp(php: string[]): Promise<boolean> {
   process.stdout.write('\nLint PHP files...\n');
 
-  await runCommand('php', [join(__dirname, 'php-cs-fixer'), 'fix', '--config', '.php_cs.dist', ...php], process.cwd());
+  const defaultConfigFile = join(__dirname, '..', 'starter', '.php_cs.dist');
+  const configFile = join(process.cwd(), '.php_cs.dist');
+  const config = existsSync(configFile) ? configFile : defaultConfigFile;
+
+  await runCommand('php', [join(__dirname, 'php-cs-fixer'), 'fix', '--config', config, ...php], process.cwd());
   return true;
 }
 
@@ -147,11 +151,15 @@ export async function handler({ files, fix, showAll }: IArgv) {
     process.stdout.write('All TypeScript looks good👌\n');
   }
 
-  const php = files.filter(file => {
-    const ext = extname(file).toLowerCase();
-    return ext === '.php';
-  });
-  const phpResult = php.length > 0 ? await  lintPhp(php) : true;
+  let phpResult = true;
+  if (fix) {
+    const php = files.filter(file => {
+      const ext = extname(file).toLowerCase();
+      return ext === '.php';
+    });
+
+    phpResult = php.length > 0 ? await  lintPhp(php) : true;
+  }
 
   if (cssResult && jsResult && tsResult && phpResult) {
     process.exit(0);
