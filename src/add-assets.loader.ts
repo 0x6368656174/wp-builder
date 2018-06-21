@@ -34,6 +34,9 @@ module.exports = function(this: LoaderContext, content: string): string {
   const script = `<script  type="text/javascript" src="${jsDistFile}${versionString}" defer></script>\n`;
 
   if (isBase(resourceBaseName, project.mainTemplates)) {
+    // Добавим vendors, runtime, common
+    content = content.replace('</head>', `{% include '__split-chunks.twig'%}\n</head>`);
+
     let headScripts = '';
 
     // // Добавим runtime.js
@@ -79,10 +82,6 @@ module.exports = function(this: LoaderContext, content: string): string {
 
     // Добавим стили
     content = content.replace('</head>', `${headStyles}</head>`);
-
-    // Добавим vendors, runtime, common
-    content = content.replace('</head>', `{% include '__split-chunks.twig'%}\n</head>`);
-
   } else {
     // Для остальных шаблонов
     if (jsDistFile) {
