@@ -28,4 +28,4 @@ return PhpCsFixer\Config::create()
       'single_line_comment_style' => true,
     ]
   )
-  ->setCacheFile(__DIR__.'/.php
+  ->setCacheFile(__DIR__.'/.php_cs.cache');

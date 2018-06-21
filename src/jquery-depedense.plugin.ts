@@ -33,6 +33,8 @@ export class JqueryDepedensePlugin {
 
       const php = `<?php
 
+declare(strict_types=1);
+
 add_action( 'wp_enqueue_scripts', function () {
   wp_register_script('${wpConfig.defaultTheme}-jquery-script', '', array('jquery'));
   wp_enqueue_script('${wpConfig.defaultTheme}-jquery-script');
@@ -43,7 +45,7 @@ add_action( 'wp_enqueue_scripts', function () {
       if (!existsSync(functionsFolder)) {
         await mkdirp(functionsFolder);
       }
-      writeFileSync(join(functionsFolder, '_JQuery.php'), php);
+      writeFileSync(join(functionsFolder, '__jquery.php'), php);
       return true;
     });
   }

@@ -1,7 +1,5 @@
 import * as CleanWebpackPlugin from 'clean-webpack-plugin';
 import * as CopyWebpackPlugin from 'copy-webpack-plugin';
-import { CreateSplitChunksImportTemplatePlugin } from './create-split-chunks-import-template.plugin';
-import { JqueryDepedensePlugin } from './jquery-depedense.plugin';
 import * as cssnano from 'cssnano';
 import * as ExtractTextPlugin from 'extract-text-webpack-plugin';
 import { existsSync, readFileSync } from 'fs';
@@ -11,8 +9,12 @@ import { join, resolve } from 'path';
 import * as postcssPresetEnv from 'postcss-preset-env';
 import { Configuration } from 'webpack';
 import * as webpack from 'webpack';
+import {ComposerAutoloadFixPlugin} from './composer-autoload-fix.plugin';
 import { readConfig } from './config-read';
+import { CreateSplitChunksImportTemplatePlugin } from './create-split-chunks-import-template.plugin';
+import { JqueryDepedensePlugin } from './jquery-depedense.plugin';
 import { SuppressChunksPlugin } from './suppress-chunks.plugin';
+import {TimberFixPlugin} from './timber-fix.plugin';
 import { version } from './version';
 
 interface IConfigParams {
@@ -299,6 +301,8 @@ export function webpackConfig(params: IConfigParams): Configuration {
       ]),
       new CleanWebpackPlugin([outputPath], {root: join(process.cwd(), wpConfig.build.outputPath), verbose: false}),
       new CreateSplitChunksImportTemplatePlugin(),
+      new TimberFixPlugin(),
+      new ComposerAutoloadFixPlugin(),
       // // Добавим глобальный объявления для jQuery
       new webpack.ProvidePlugin({
         '$'                : 'jquery',

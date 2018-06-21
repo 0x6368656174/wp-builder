@@ -16,7 +16,7 @@ module.exports = function(this: LoaderContext, content: string): string {
   const wpConfig = readConfig();
   const project = wpConfig.themes[wpConfig.defaultTheme];
   const context = join(process.cwd(), project.root);
-  const outputPath = '{{ site.link }}/{{ theme.path }}';
+  const outputPath = '{{ site.link }}{{ __theme_path }}';
   const isDevelopment = options.mode === 'development';
   const serve = options.serve;
   const versionString = `?ver=${version(isDevelopment)}`;
@@ -37,16 +37,16 @@ module.exports = function(this: LoaderContext, content: string): string {
     let headScripts = '';
 
     // // Добавим runtime.js
-    // headScripts += `<script type="text/javascript" src="{{ site.link }}/{{ theme.path }}/runtime.js${versionString}" defer></script>\n`;
+    // headScripts += `<script type="text/javascript" src="${outputPath}/runtime.js${versionString}" defer></script>\n`;
     //
     // // Добавим vendors.js
-    // headScripts += `<script type="text/javascript" src="{{ site.link }}{{ theme.path }}/vendors.js${versionString}" defer></script>\n`;
+    // headScripts += `<script type="text/javascript" src="${outputPath}/vendors.js${versionString}" defer></script>\n`;
     //
     // // Добавим commons.js
-    // headScripts += `<script type="text/javascript" src="{{ site.link }}/{{ theme.path }}/commons.js${versionString}" defer></script>\n`;
+    // headScripts += `<script type="text/javascript" src="${outputPath}/commons.js${versionString}" defer></script>\n`;
 
     // Добавим style.js, т.к. иначе WebPack не запустит все, что зависит от style
-    headScripts += `<script type="text/javascript" src="{{ site.link }}/{{ theme.path }}/style.js${versionString}" defer></script>\n`;
+    headScripts += `<script type="text/javascript" src="${outputPath}/style.js${versionString}" defer></script>\n`;
 
     // Если serve, то добавим скрипт вебпака
     if (serve) {
@@ -72,10 +72,10 @@ module.exports = function(this: LoaderContext, content: string): string {
     let headStyles = '';
 
     // // Добавим vendors.css
-    // headStyles += `<link rel="stylesheet"  type="text/css" href="{{ site.link }}/{{ theme.path }}/vendors.css${versionString}">\n`;
+    // headStyles += `<link rel="stylesheet"  type="text/css" href="{{ site.link }}{{ __theme_path }}/vendors.css${versionString}">\n`;
 
     // Добавим style.css
-    headStyles += `<link rel="stylesheet"  type="text/css" href="{{ site.link }}/{{ theme.path }}/style.css${versionString}">\n`;
+    headStyles += `<link rel="stylesheet"  type="text/css" href="${outputPath}/style.css${versionString}">\n`;
 
     // Добавим стили
     content = content.replace('</head>', `${headStyles}</head>`);
