@@ -4,6 +4,7 @@ import * as glob from 'glob';
 import { extname, isAbsolute, join } from 'path';
 import { lint } from 'stylelint';
 import { Configuration, Linter } from 'tslint';
+import {runCommand} from './utils';
 
 interface IArgv {
   files?: string[];
@@ -63,11 +64,19 @@ async function lintJs(js: string[], fix: boolean, showAll: boolean): Promise<boo
   return result.errorCount === 0 && result.warningCount === 0;
 }
 
+async function lintPhp(php: string[]): Promise<boolean> {
+  process.stdout.write('\nLint PHP files...\n');
+
+  await runCommand('php', [join(__dirname, 'php-cs-fixer'), 'fix', '--config', '.php_cs.dist', ...php], process.cwd());
+  return true;
+}
+
 async function lintTs(ts: string[], fix: boolean, showAll: boolean): Promise<boolean> {
   process.stdout.write('\nLint TypeScript files...\n');
 
   const defaultConfigFile = join(__dirname, '..', 'starter', 'tslint.json');
   const configFile = join(process.cwd(), 'tslint.json');
+  const config = existsSync(configFile) ? configFile : defaultConfigFile;
 
   const options = {
     fix,
@@ -79,7 +88,7 @@ async function lintTs(ts: string[], fix: boolean, showAll: boolean): Promise<boo
   for (const fileName of ts) {
     const linter = new Linter(options);
     const fileContents = readFileSync(fileName, 'utf-8');
-    const configuration = Configuration.findConfiguration(configFile, fileName).results;
+    const configuration = Configuration.findConfiguration(config, fileName).results;
     linter.lint(fileName, fileContents, configuration);
     const lintResult = linter.getResult();
     if (lintResult.errorCount > 0 || lintResult.warningCount > 0) {
@@ -97,21 +106,6 @@ async function lintTs(ts: string[], fix: boolean, showAll: boolean): Promise<boo
   }
 
   return result;
-  //
-  // const result = cli.executeOnFiles(js);
-  // const formatter = cli.getFormatter('stylish');
-  // process.stdout.write(formatter(result.results));
-  //
-  // const goodJs = result.results.filter(f => f.errorCount === 0 && f.warningCount === 0);
-  // for (const file of goodJs) {
-  //   process.stdout.write(`JS ${file.filePath} looks good👌\n`);
-  // }
-  //
-  // if (fix) {
-  //   CLIEngine.outputFixes(result);
-  // }
-  //
-  // return result.errorCount === 0 && result.warningCount === 0;
 }
 
 export async function handler({ files, fix, showAll }: IArgv) {
@@ -124,7 +118,7 @@ export async function handler({ files, fix, showAll }: IArgv) {
   });
 
   const styles = files.filter(file => {
-    const ext = extname(file);
+    const ext = extname(file).toLowerCase();
     return ext === '.css' || ext === '.scss' || ext === '.sass';
   });
 
@@ -134,7 +128,7 @@ export async function handler({ files, fix, showAll }: IArgv) {
   }
 
   const js = files.filter(file => {
-    const ext = extname(file);
+    const ext = extname(file).toLowerCase();
     return ext === '.js';
   });
 
@@ -144,7 +138,7 @@ export async function handler({ files, fix, showAll }: IArgv) {
   }
 
   const ts = files.filter(file => {
-    const ext = extname(file);
+    const ext = extname(file).toLowerCase();
     return ext === '.ts';
   });
 
@@ -153,7 +147,13 @@ export async function handler({ files, fix, showAll }: IArgv) {
     process.stdout.write('All TypeScript looks good👌\n');
   }
 
-  if (cssResult && jsResult && tsResult) {
+  const php = files.filter(file => {
+    const ext = extname(file).toLowerCase();
+    return ext === '.php';
+  });
+  const phpResult = php.length > 0 ? await  lintPhp(php) : true;
+
+  if (cssResult && jsResult && tsResult && phpResult) {
     process.exit(0);
   } else {
     process.exit(1);

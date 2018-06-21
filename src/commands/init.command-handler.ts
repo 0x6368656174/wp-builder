@@ -1,10 +1,10 @@
 import * as camelcase from 'camelcase';
-import { spawn } from 'child_process';
 import { lstatSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import * as glob from 'glob';
 import { basename, join, relative } from 'path';
 import { createInterface } from 'readline';
 import * as svg2png from 'svg2png';
+import { runCommand } from './utils';
 
 const rl = createInterface({
   input: process.stdin,
@@ -110,22 +110,6 @@ export async function handler() {
       user: dbUser || 'username_here',
     }, dir);
   }
-}
-
-function runCommand(commandStr: string, options: string[], cwd: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const cmd = spawn(commandStr, options, { cwd });
-    cmd.stdout.on('data', data => process.stdout.write(data));
-    cmd.stderr.on('data', data => process.stderr.write(data));
-
-    cmd.on('close', code => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(code);
-      }
-    });
-  });
 }
 
 async function createScreenshot(dir: string, projectThemeName: string) {

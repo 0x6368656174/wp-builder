@@ -8,6 +8,7 @@
   "license": "LGPL-3.0",
   "private": false,
   "scripts": {
+    "install": "node install/php-cs-fixer",
     "build": "node_modules/.bin/tsc",
     "version": "node utils/version.js $npm_package_version && git add src/index.ts src/starter/package.json && git commit -m 'patch new version'",
     "postversion": "git push && git push --tags"
@@ -44,6 +45,7 @@
     "prettier": "^1.13.5",
     "resolve-url-loader": "^2.3.0",
     "sass-loader": "^7.0.1",
+    "simple-get": "^3.0.2",
     "ssh2": "^0.6.1",
     "ssh2-streams": "^0.2.1",
     "style-loader": "^0.21.0",
