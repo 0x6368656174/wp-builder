@@ -5,12 +5,19 @@ export const describe = 'Deploy all dist files to remote SSH-server. To create d
 export const builder: {[key: string]: Options} = {
   archiveFolder: {
     alias: 'a',
+    demand: true,
     describe: 'Remote folder for archive',
     type: 'string',
   },
   backupFolder: {
     alias: 'b',
+    demand: true,
     describe: 'Remote folder for backup',
+    type: 'string',
+  },
+  dist: {
+    default: 'dist',
+    describe: 'Dist path',
     type: 'string',
   },
   exclude: {
@@ -20,6 +27,7 @@ export const builder: {[key: string]: Options} = {
   },
   host: {
     alias: 'h',
+    demand: true,
     describe: 'SSH host',
     type: 'string',
   },
@@ -38,13 +46,19 @@ export const builder: {[key: string]: Options} = {
     describe: 'SSH port',
     type: 'number',
   },
+  privateKey: {
+    describe: 'Private key for either key-based or hostbased user authentication',
+    type: 'string',
+  },
   remoteFolder: {
     alias: 'f',
+    demand: true,
     describe: 'Remote folder to upload',
     type: 'string',
   },
   user: {
     alias: 'u',
+    demand: true,
     describe: 'SSH user',
     type: 'string',
   },

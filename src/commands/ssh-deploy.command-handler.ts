@@ -1,4 +1,4 @@
-import { createReadStream, mkdtempSync, rmdirSync, unlinkSync } from 'fs';
+import { createReadStream, existsSync, mkdtempSync, rmdirSync, unlinkSync, readFileSync} from 'fs';
 import * as moment from 'moment';
 import { tmpdir } from 'os';
 import { basename, dirname, join, normalize} from 'path';
@@ -7,31 +7,35 @@ import { FileEntry } from 'ssh2-streams';
 import { create } from 'tar';
 import { readConfig } from '../config-read';
 import { version } from '../version';
+import { generate } from 'shortid';
+import chalk from 'chalk';
 
 interface IArgv {
   archiveFolder: string;
   exclude: string[];
   host: string;
-  password: string;
+  password?: string;
   port: number;
   remoteFolder: string;
   backupFolder: string;
   user: string;
   keepClean: boolean;
+  dist: string;
+  privateKey?: string;
 }
 
-async function pack(excludes: string[]): Promise<string> {
+async function pack(excludes: string[], dist: string): Promise<string> {
   const config = readConfig();
   const project = config.project || 'project';
   const tmpFolder = mkdtempSync(join(tmpdir(), 'wp-build-'));
   const fileName = join(tmpFolder, `${project}-${version(false)}.tgz`);
   const excludePatch = excludes.map(e => normalize(e));
   await create({
-    cwd: join(process.cwd(), 'dist'),
+    cwd: join(process.cwd(), dist),
     file: fileName,
     filter: (path, enty) => {
       for (const exclude of excludePatch) {
-        if (path.startsWith(exclude)) {
+        if (path.startsWith('./' + exclude)) {
           return false;
         }
       }
@@ -44,6 +48,16 @@ async function pack(excludes: string[]): Promise<string> {
 }
 
 function connect(argv: IArgv): Promise<Client> {
+  let privateKey: string;
+
+  if (argv.privateKey) {
+    if (!existsSync(argv.privateKey)) {
+      throw new Error(`Not found ${argv.privateKey}`);
+    }
+
+    privateKey = readFileSync(argv.privateKey, 'utf-8');
+  }
+
   return new Promise((resolve, reject) => {
     const conn = new Client();
     conn.on('ready', () => {
@@ -52,6 +66,7 @@ function connect(argv: IArgv): Promise<Client> {
       host: argv.host,
       password: argv.password,
       port: argv.port,
+      privateKey,
       username: argv.user,
     });
   });
@@ -59,7 +74,7 @@ function connect(argv: IArgv): Promise<Client> {
 
 function exec(client: Client, command: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    process.stdout.write(`${command}\n`);
+    process.stdout.write(chalk`{cyan SSH exec:} ${command}\n`);
 
     client.exec(command, (err, stream) => {
       if (err) {
@@ -135,16 +150,26 @@ export async function handler(argv: IArgv) {
 
   const backup = join(backupFolder, `${project}-${moment().toISOString()}`);
   process.stdout.write(`Try copy ${argv.remoteFolder} to backup ${backup}...\n`);
-  await exec(conn, `cp -r ${argv.remoteFolder} ${backup} 2>/dev/null || :`);
+  await exec(conn, `cp -r ${argv.remoteFolder} ${backup} || :`);
   process.stdout.write(`Try copy ${argv.remoteFolder} to backup ${backup} success\n\n`);
 
   const excluded = argv.exclude.map(e => normalize(e));
 
+  const excludeTmpDirs: {[key: string]: string} = {};
+
+  for (const exclude of excluded) {
+    const tempDir = join('/', 'tmp', `wpbuild-${generate()}`);
+    process.stdout.write(`Create temp dir ${tempDir}...\n`);
+    await exec(conn, `mkdir -p ${tempDir}`);
+    excludeTmpDirs[exclude] = tempDir;
+    process.stdout.write(`Create temp dir ${tempDir} success...\n\n`);
+  }
+
   for (const exclude of excluded) {
     const from = join(argv.remoteFolder, exclude);
-    const to = join(backupFolder, exclude);
+    const to = join(excludeTmpDirs[exclude], basename(exclude));
     process.stdout.write(`Try move ${from} to ${to}...\n`);
-    await exec(conn, `mv ${from} ${to} 2>/dev/null || :`);
+    await exec(conn, `mv ${from} ${to} || :`);
     process.stdout.write(`Try move ${from} to ${to} success\n\n`);
   }
 
@@ -164,9 +189,9 @@ export async function handler(argv: IArgv) {
   const sfpt = await getSftp(conn);
   process.stdout.write('Open SFTP session success\n\n');
 
-  process.stdout.write('Pack dist folder...\n');
-  const archive = await pack(argv.exclude);
-  process.stdout.write(`Pack dist folder to ${archive} success\n\n`);
+  process.stdout.write(`Pack dist folder ${join(process.cwd(), argv.dist)}...\n`);
+  const archive = await pack(argv.exclude, argv.dist);
+  process.stdout.write(`Pack dist folder ${join(process.cwd(), argv.dist)} to ${archive} success\n\n`);
 
   const remoteArchive = join(argv.archiveFolder, basename(archive));
   process.stdout.write(`Upload ${archive} to ${remoteArchive}...\n`);
@@ -187,11 +212,16 @@ export async function handler(argv: IArgv) {
   process.stdout.write(`Unpack ${remoteArchive} to ${argv.remoteFolder} success\n\n`);
 
   for (const exclude of excluded) {
-    const from = join(backupFolder, exclude);
+    const tempDir = excludeTmpDirs[exclude];
+    const from = join(tempDir, basename(exclude));
     const to = join(argv.remoteFolder, exclude);
     process.stdout.write(`Try move ${from} to ${to}...\n`);
-    await exec(conn, `mv ${from} ${to} 2>/dev/null || :`);
+    await exec(conn, `mv ${from} ${to} || :`);
     process.stdout.write(`Try move ${from} to ${to} success\n\n`);
+
+    process.stdout.write(`Remove temp dir ${tempDir}...\n`);
+    await exec(conn, `rm -r ${tempDir}`);
+    process.stdout.write(`Remove temp dir ${tempDir} success\n\n`);
   }
 
   process.stdout.write(`Deploy finished\n`);
