@@ -61,7 +61,7 @@ export function handler(argv: IArgv) {
   const compiler = webpack(wpConfig);
   const server = new WebpackDevServer(compiler, {
     contentBase: dist,
-    stats: statsConfig,
+    stats: statsConfig as any, // FIXME: Проверить типы
     watchOptions: {
       aggregateTimeout: 300,
       poll: 1000,
