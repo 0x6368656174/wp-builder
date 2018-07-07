@@ -16,7 +16,7 @@ module.exports = function(this: LoaderContext, content: string): string {
   const wpConfig = readConfig();
   const project = wpConfig.themes[wpConfig.defaultTheme];
   const context = join(process.cwd(), project.root);
-  const outputPath = '{{ site.link }}{{ __theme_path }}';
+  const outputPath = '{{ __theme_path }}';
   const isDevelopment = options.mode === 'development';
   const serve = options.serve;
   const versionString = `?ver=${version(isDevelopment)}`;
@@ -75,7 +75,7 @@ module.exports = function(this: LoaderContext, content: string): string {
     let headStyles = '';
 
     // // Добавим vendors.css
-    // headStyles += `<link rel="stylesheet"  type="text/css" href="{{ site.link }}{{ __theme_path }}/vendors.css${versionString}">\n`;
+    // headStyles += `<link rel="stylesheet"  type="text/css" href="{{ __theme_path }}/vendors.css${versionString}">\n`;
 
     // Добавим style.css
     headStyles += `<link rel="stylesheet"  type="text/css" href="${outputPath}/style.css${versionString}">\n`;

@@ -29,10 +29,10 @@ export class CreateSplitChunksImportTemplatePlugin {
       }
 
       const twig = js
-          .map(script => `<script type="text/javascript" src="{{ site.link }}{{ __theme_path }}/${script}${versionString}" defer></script>`)
+          .map(script => `<script type="text/javascript" src="{{ __theme_path }}/${script}${versionString}" defer></script>`)
           .join('\n')
         + css
-          .map(style => `<link rel="stylesheet"  type="text/css" href="{{ site.link }}{{ __theme_path }}/${style}${versionString}">`)
+          .map(style => `<link rel="stylesheet"  type="text/css" href="{{ __theme_path }}/${style}${versionString}">`)
           .join('\n');
 
       const outputPath = (compiler.options.output || {}).path || '';
