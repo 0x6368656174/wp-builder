@@ -38,7 +38,7 @@ class InstallHooks
       $wpConfigContent = str_replace("define('DB_USER', 'username_here');", "define('DB_USER', '{$DB_USER}');", $wpConfigContent);
       $wpConfigContent = str_replace("define('DB_PASSWORD', 'password_here');", "define('DB_PASSWORD', '{$DB_PASSWORD}');", $wpConfigContent);
       $wpConfigContent = str_replace("define('DB_HOST', 'localhost');", "define('DB_HOST', '{$DB_HOST}');", $wpConfigContent);
-      $wpConfigContent = str_replace("define('DB_DEBUG', false);", "define('WP_DEBUG', {$WP_DEBUG});", $wpConfigContent);
+      $wpConfigContent = str_replace("define('WP_DEBUG', false);", "define('WP_DEBUG', {$WP_DEBUG});", $wpConfigContent);
 
       $customConfigs = <<<'CONFIG'
 define( 'WP_CONTENT_DIR', dirname(__FILE__) . '/wp-content' );
