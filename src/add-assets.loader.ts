@@ -86,12 +86,17 @@ module.exports = function(this: LoaderContext, content: string): string {
     // Для остальных шаблонов
     if (jsDistFile) {
       // Если шаблон расширяет другой шаблон
-      if (/{%\s+extends/.test(content)) {
-        // Переопределим блок js и добавим в него скрипт
-        content += `{% block js %}\n{{ parent() }}\n${script}{% endblock %}\n`;
+      const block = /{%\s+extends/.test(content)
+        ? `{% block js %}\n{{ parent() }}\n${script}{% endblock %}\n`
+        : `{% block js %}\n${script}{% endblock %}\n`;
+
+      const rx = /{%\s*block\s+js\s*%}\s*{%\s*endblock\s*%}/;
+      if (rx.test(content)) {
+        // Если в шаблоне указан блок для JS, то заменим его
+        content = content.replace(rx, block);
       } else {
-        // Создалим блок js и добавим в него скрипт
-        content += `{% block js %}\n${script}{% endblock %}\n`;
+        // Иначе добавим блок в конец шаблона
+        content += block;
       }
     }
   }
