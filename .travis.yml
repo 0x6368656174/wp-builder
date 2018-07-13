@@ -3,10 +3,12 @@ language: nodejs
 node_js:
   - "node"
 
-cache: yarn
+cache:
+  directories:
+  - node_modules
 
 before_script:
-  - yarn install
+  - npm install
   - npm run build
   - node utils/create-package.json.js
   - cp src/router.php dist
@@ -21,7 +23,7 @@ script:
   - node index.js serve --help
 
 before_deploy:
-  - yarn pack
+  - npm pack
 
 deploy:
   - provider: releases
