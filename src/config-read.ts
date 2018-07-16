@@ -9,6 +9,9 @@ interface ITheme {
   root: string;
   asserts?: string[];
   mainTemplates: string[];
+  breakpoints?: {
+    [breakpoint: string]: string;
+  };
 }
 
 interface IConfig {

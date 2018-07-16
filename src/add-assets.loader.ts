@@ -20,6 +20,8 @@ module.exports = function(this: LoaderContext, content: string): string {
   const isDevelopment = options.mode === 'development';
   const serve = options.serve;
   const versionString = `?ver=${version(isDevelopment)}`;
+  const breakpoints = project.breakpoints || {};
+  const breakpointNames = Object.keys(breakpoints);
 
   const resourceBaseName = basename(this.resourcePath);
 
@@ -51,6 +53,12 @@ module.exports = function(this: LoaderContext, content: string): string {
     // Добавим style.js, т.к. иначе WebPack не запустит все, что зависит от style
     headScripts += `<script type="text/javascript" src="${outputPath}/style.js${versionString}" defer></script>\n`;
 
+    // Добавим style.js для всех breakpoints
+    for (const breakpoint of breakpointNames) {
+      headScripts +=
+        `<script type="text/javascript" src="${outputPath}/style.${breakpoint}.js${versionString}" defer></script>\n`;
+    }
+
     // Если serve, то добавим скрипт вебпака
     if (serve) {
       headScripts += '<script type="text/javascript" src="http://localhost:4201/webpack-dev-server.js" defer></script>\n';
@@ -79,6 +87,13 @@ module.exports = function(this: LoaderContext, content: string): string {
 
     // Добавим style.css
     headStyles += `<link rel="stylesheet"  type="text/css" href="${outputPath}/style.css${versionString}">\n`;
+
+    // Добавим style.css для всех breakpoints
+    for (const breakpoint of breakpointNames) {
+      headStyles +=
+        `<link rel="stylesheet" type="text/css" href="${outputPath}/style.${breakpoint}.css${versionString}"`
+        + ` media="${breakpoints[breakpoint]}">\n`;
+    }
 
     // Добавим стили
     content = content.replace('</head>', `${headStyles}</head>`);

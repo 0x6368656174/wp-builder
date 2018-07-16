@@ -4,11 +4,12 @@ import * as cssnano from 'cssnano';
 import * as ExtractTextPlugin from 'extract-text-webpack-plugin';
 import { existsSync, readFileSync } from 'fs';
 import * as glob from 'glob';
+import { flatten } from 'lodash';
 import * as ExtractCssPlugin from 'mini-css-extract-plugin';
 import { join, normalize, resolve } from 'path';
 import * as postcssPresetEnv from 'postcss-preset-env';
-import { Configuration } from 'webpack';
 import * as webpack from 'webpack';
+import { Configuration } from 'webpack';
 import {ComposerAutoloadFixPlugin} from './composer-autoload-fix.plugin';
 import { readConfig } from './config-read';
 import { CreateSplitChunksImportTemplatePlugin } from './create-split-chunks-import-template.plugin';
@@ -16,6 +17,7 @@ import { JqueryDepedensePlugin } from './jquery-depedense.plugin';
 import { SuppressChunksPlugin } from './suppress-chunks.plugin';
 import {TimberFixPlugin} from './timber-fix.plugin';
 import { version } from './version';
+import SplitChunksOptions = webpack.Options.SplitChunksOptions;
 
 interface IConfigParams {
   mode: 'development' | 'production';
@@ -57,6 +59,101 @@ export function webpackConfig(params: IConfigParams): Configuration {
     postcssCssNextPlugins.push((cssnano as any)({autoprefixer: false}));
   }
 
+  function createSplitChunks(): SplitChunksOptions {
+    const breakpoints = Object.keys(theme.breakpoints || {});
+    const breakpointEnds = breakpoints.map(breakpoint => {
+      return [
+        `.${breakpoint}.scss`,
+        `.${breakpoint}.sass`,
+        `.${breakpoint}.css`,
+      ];
+    });
+    const breakpointFlatEnds = flatten(breakpointEnds);
+
+    const chunks: SplitChunksOptions = {
+      cacheGroups: {
+        // В commons.js будет содержаться все, что используется больше чем в 2 модулях
+        commons: {
+          chunks: 'initial',
+          minChunks: 2,
+          minSize: 0,
+          name: 'commons',
+          priority: -10,
+          test: /\.[jt]s$/,
+        },
+        editorStyle: {
+          chunks: 'all',
+          enforce: true,
+          name: 'editor-style',
+          test: m => m.constructor.name === 'CssModule' && recursiveIssuerName(m) === 'editor-style',
+        },
+        // Все стили вынесем в style.css
+        style: {
+          chunks: 'all',
+          enforce: true,
+          name: 'style',
+          priority: -10,
+          test: m => {
+            if (m.constructor.name !== 'CssModule') {
+              return false;
+            }
+
+            if (recursiveIssuerName(m) === 'editor-style') {
+              return false;
+            }
+
+            const fileName = m.issuer.resource.toLowerCase();
+
+            for (const breakpointEnd of breakpointFlatEnds) {
+              if (fileName.endsWith(breakpointEnd)) {
+                return false;
+              }
+            }
+
+            return true;
+          },
+        },
+        // В vendors.js будет содержаться все, что из node_modules
+        vendors: {
+          chunks: 'all',
+          minSize: 0,
+          name: 'vendors',
+          test: /[\\/]node_modules[\\/]/,
+        },
+      },
+    };
+
+    for (const breakpoint of breakpoints) {
+      (chunks.cacheGroups as any)[`style.${breakpoint}`] = {
+        chunks: 'all',
+        enforce: true,
+        name: `style.${breakpoint}`,
+        priority: -10,
+        test: (m: any) => {
+          if (m.constructor.name !== 'CssModule') {
+            return false;
+          }
+
+          if (recursiveIssuerName(m) === 'editor-style') {
+            return false;
+          }
+
+          const fileName = m.issuer.resource.toLowerCase();
+
+          for (const breakpointEnd of breakpointFlatEnds) {
+            if (fileName.endsWith(breakpointEnd)) {
+              return true;
+            }
+          }
+
+          return false;
+        },
+      };
+    }
+
+    return chunks;
+  }
+
   function nodeModulesPath() {
     const main = require.main;
     if (!main) {
@@ -82,9 +179,9 @@ export function webpackConfig(params: IConfigParams): Configuration {
     });
   }
 
-  function recursiveIssuer(m: any): string | false {
+  function recursiveIssuerName(m: any): string | false {
     if (m.issuer) {
-      return recursiveIssuer(m.issuer);
+      return recursiveIssuerName(m.issuer);
     } else if (m.name) {
       return m.name;
     } else {
@@ -92,10 +189,29 @@ export function webpackConfig(params: IConfigParams): Configuration {
     }
   }
 
+  function testCss(file: string, breakpoint: string = ''): string | false {
+    breakpoint = breakpoint ? `.${breakpoint}` : '';
+    const scssFile = file.replace(/\.twig$/, `${breakpoint}.scss`);
+    const sassFile = file.replace(/\.twig$/, `${breakpoint}.sass`);
+    const cssFile = file.replace(/\.twig$/, `${breakpoint}.css`);
+
+    if (existsSync(scssFile)) {
+      return scssFile;
+    } else if (existsSync(sassFile)) {
+      return sassFile;
+    } else if (existsSync(cssFile)) {
+      return cssFile;
+    }
+
+    return false;
+  }
+
   return {
     context,
     devtool: isDevelopment ? 'source-map' : false,
     entry: () => {
+      // Прочитаем брекйпоинты
+      const breakpoints = Object.keys(theme.breakpoints || {});
       // Добавим шаблоны и скрипты для них
       const files = glob.sync(`${context}/**/*.twig`);
       const entries = files.map(file => {
@@ -109,15 +225,16 @@ export function webpackConfig(params: IConfigParams): Configuration {
           result.push(jsFile);
         }
 
-        const scssFile = file.replace(/\.twig$/, '.scss');
-        const sassFile = file.replace(/\.twig$/, '.sass');
-        const cssFile = file.replace(/\.twig$/, '.css');
-        if (existsSync(scssFile)) {
-          result.push(scssFile);
-        } else if (existsSync(sassFile)) {
-          result.push(sassFile);
-        } else if (existsSync(cssFile)) {
-          result.push(cssFile);
+        const originalStyleTest = testCss(file);
+        if (originalStyleTest) {
+          result.push(originalStyleTest);
+        }
+
+        for (const breakpoint of breakpoints) {
+          const breakpointTest = testCss(file, breakpoint);
+          if (breakpointTest) {
+            result.push(breakpointTest);
+          }
         }
 
         const filePath = file.replace(new RegExp(`^${context}/`), '');
@@ -236,40 +353,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
     },
     optimization: {
       runtimeChunk: 'single',
-      splitChunks: {
-        cacheGroups: {
-          // В commons.js будет содержаться все, что используется больше чем в 2 модулях
-          commons: {
-            chunks: 'initial',
-            minChunks: 2,
-            minSize: 0,
-            name: 'commons',
-            priority: -10,
-            test: /\.[jt]s$/,
-          },
-          editorStyle: {
-            chunks: 'all',
-            enforce: true,
-            name: 'editor-style',
-            test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'editor-style',
-          },
-          // Все стили вынесем в style.css
-          style: {
-            chunks: 'all',
-            enforce: true,
-            name: 'style',
-            priority: -10,
-            test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) !== 'editor-style',
-          },
-          // В vendors.js будет содержаться все, что из node_modules
-          vendors: {
-            chunks: 'all',
-            minSize: 0,
-            name: 'vendors',
-            test: /[\\/]node_modules[\\/]/,
-          },
-        },
-      },
+      splitChunks: createSplitChunks(),
     },
     output: {
       filename: '[name].js',
