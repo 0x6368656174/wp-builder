@@ -26,7 +26,23 @@ interface IConfigParams {
   deployUrl?: string;
 }
 
+function testConfig() {
+  // const wpConfig = readConfig();
+
+  // for (const [themeName, theme] of Object.entries(wpConfig.themes)) {
+  //   const breakpoints = Object.keys(theme.breakpoints || {});
+  //
+  //   if (breakpoints.indexOf('common') !== -1) {
+  //     throw new Error(`Breakpoint name "common" is reserved!`
+  //       + ` Check breakpoints in "${themeName}" theme in wp-config.json`);
+  //   }
+  // }
+}
+
 export function webpackConfig(params: IConfigParams): Configuration {
+  // Проверим конфигу
+  testConfig();
+
   const isDevelopment = params.mode === 'development';
   const serve = params.serve || false;
   const wpConfig = readConfig();
@@ -210,8 +226,13 @@ export function webpackConfig(params: IConfigParams): Configuration {
     context,
     devtool: isDevelopment ? 'source-map' : false,
     entry: () => {
+      const styleEntry: string[] = [];
       // Прочитаем брекйпоинты
       const breakpoints = Object.keys(theme.breakpoints || {});
+      const breakpointsEntries: {[key: string]: string[]} = {};
+      for (const breakpoint of breakpoints) {
+        breakpointsEntries[breakpoint] = [];
+      }
       // Добавим шаблоны и скрипты для них
       const files = glob.sync(`${context}/**/*.twig`);
       const entries = files.map(file => {
@@ -227,13 +248,15 @@ export function webpackConfig(params: IConfigParams): Configuration {
 
         const originalStyleTest = testCss(file);
         if (originalStyleTest) {
-          result.push(originalStyleTest);
+          styleEntry.push(originalStyleTest);
+          // result.push(originalStyleTest);
         }
 
         for (const breakpoint of breakpoints) {
           const breakpointTest = testCss(file, breakpoint);
           if (breakpointTest) {
-            result.push(breakpointTest);
+            // result.push(breakpointTest);
+            breakpointsEntries[breakpoint].push(breakpointTest);
           }
         }
 
@@ -242,6 +265,12 @@ export function webpackConfig(params: IConfigParams): Configuration {
 
         return {[fileName]: result};
       });
+
+      // Добавим стили
+      entries.push({style: styleEntry});
+      for (const [breakpointName, entryFiles] of Object.entries(breakpointsEntries)) {
+        entries.push({[`style.${breakpointName}`]: entryFiles});
+      }
 
       // Добавим стили редактора
       const editorStyleScss = join(context, 'editor-style.scss');

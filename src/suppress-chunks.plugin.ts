@@ -11,7 +11,7 @@ export class SuppressChunksPlugin {
     const project = wpConfig.themes[wpConfig.defaultTheme];
     const context = join(process.cwd(), project.root);
 
-    const skipChunkNames = ['style', 'vendors', 'commons', 'runtime'];
+    const skipChunkNames = ['vendors', 'commons', 'runtime'];
 
     compiler.hooks.shouldEmit.tap('SuppressChunksPlugin', (compilation: Compilation) => {
       for (const chunk of compilation.chunks) {

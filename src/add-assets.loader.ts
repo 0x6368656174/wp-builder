@@ -50,14 +50,14 @@ module.exports = function(this: LoaderContext, content: string): string {
     // // Добавим commons.js
     // headScripts += `<script type="text/javascript" src="${outputPath}/commons.js${versionString}" defer></script>\n`;
 
-    // Добавим style.js, т.к. иначе WebPack не запустит все, что зависит от style
-    headScripts += `<script type="text/javascript" src="${outputPath}/style.js${versionString}" defer></script>\n`;
+    // // Добавим style.js, т.к. иначе WebPack не запустит все, что зависит от style
+    // headScripts += `<script type="text/javascript" src="${outputPath}/style.js${versionString}" defer></script>\n`;
 
-    // Добавим style.js для всех breakpoints
-    for (const breakpoint of breakpointNames) {
-      headScripts +=
-        `<script type="text/javascript" src="${outputPath}/style.${breakpoint}.js${versionString}" defer></script>\n`;
-    }
+    // // Добавим style.js для всех breakpoints
+    // for (const breakpoint of breakpointNames) {
+    //   headScripts +=
+    //     `<script type="text/javascript" src="${outputPath}/style.${breakpoint}.js${versionString}" defer></script>\n`;
+    // }
 
     // Если serve, то добавим скрипт вебпака
     if (serve) {
