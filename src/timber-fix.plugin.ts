@@ -1,5 +1,5 @@
 import { existsSync, writeFileSync } from 'fs';
-import * as mkdirp from 'make-dir';
+import * as mkdirp from 'mkdirp';
 import { join } from 'path';
 import { Compiler } from 'webpack';
 import * as webpack from 'webpack';
@@ -7,7 +7,7 @@ import Compilation = webpack.compilation.Compilation;
 
 export class TimberFixPlugin {
   public apply(compiler: Compiler) {
-    compiler.hooks.afterEmit.tap('TimberFixPlugin', async (compilation: Compilation) => {
+    compiler.hooks.afterEmit.tap('TimberFixPlugin',  (compilation: Compilation) => {
 
       const php = `<?php
 
@@ -27,7 +27,7 @@ add_filter('timber/context', function ($context) {
       const outputPath = (compiler.options.output || {}).path || '';
       const functionsFolder = join(outputPath, 'functions.php.d');
       if (!existsSync(functionsFolder)) {
-        await mkdirp(functionsFolder);
+        mkdirp.sync(functionsFolder);
       }
       writeFileSync(join(functionsFolder, '__timber-fix.php'), php);
       return true;

@@ -1,5 +1,5 @@
 import { existsSync, writeFileSync } from 'fs';
-import * as mkdirp from 'make-dir';
+import * as mkdirp from 'mkdirp';
 import { join } from 'path';
 import { Compiler } from 'webpack';
 import * as webpack from 'webpack';
@@ -15,7 +15,7 @@ export class CreateSplitChunksImportTemplatePlugin {
     const jsChunkNames = chunkNames.map(chunk => chunk + '.js');
     const cssChunkNames = chunkNames.map(chunk => chunk + '.css');
 
-    compiler.hooks.afterEmit.tap('CreateSplitChunksImportTemplatePlugin', async (compilation: Compilation) => {
+    compiler.hooks.afterEmit.tap('CreateSplitChunksImportTemplatePlugin',  (compilation: Compilation) => {
       const assets = Object.keys(compilation.assets);
       const js = [];
       const css = [];
@@ -38,7 +38,7 @@ export class CreateSplitChunksImportTemplatePlugin {
       const outputPath = (compiler.options.output || {}).path || '';
       const viewsFolder = join(outputPath, 'views');
       if (!existsSync(viewsFolder)) {
-        await mkdirp(viewsFolder);
+        mkdirp.sync(viewsFolder);
       }
       writeFileSync(join(viewsFolder, '__split-chunks.twig'), twig);
       return true;

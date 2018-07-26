@@ -1,5 +1,5 @@
 import { existsSync, writeFileSync } from 'fs';
-import * as mkdirp from 'make-dir';
+import * as mkdirp from 'mkdirp';
 import { basename, extname, join } from 'path';
 import { Compiler } from 'webpack';
 import * as webpack from 'webpack';
@@ -12,7 +12,7 @@ export class JqueryDepedensePlugin {
 
     const ignoreNames = ['style.js', 'vendors.js', 'commons.js', 'runtime.js'];
 
-    compiler.hooks.afterEmit.tap('CreateSplitChunksImportTemplatePlugin', async (compilation: Compilation) => {
+    compiler.hooks.afterEmit.tap('CreateSplitChunksImportTemplatePlugin',  (compilation: Compilation) => {
       const assets = Object.keys(compilation.assets);
       let hasJs = false;
       for (const asset of assets) {
@@ -43,7 +43,7 @@ add_action( 'wp_enqueue_scripts', function () {
       const outputPath = (compiler.options.output || {}).path || '';
       const functionsFolder = join(outputPath, 'functions.php.d');
       if (!existsSync(functionsFolder)) {
-        await mkdirp(functionsFolder);
+        mkdirp.sync(functionsFolder);
       }
       writeFileSync(join(functionsFolder, '__jquery.php'), php);
       return true;
