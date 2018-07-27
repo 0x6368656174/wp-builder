@@ -92,11 +92,12 @@ export async function handler() {
     process.stdout.write(`Created file ${newFileFullPath}\n`);
   }
 
+  await runCommand('git', ['init'], dir);
+
   await runCommand('composer', ['install'], dir);
   await runCommand('npm', ['install'], dir);
 
   await createScreenshot(dir, projectThemeName);
-  await runCommand('git', ['init'], dir);
   await runCommand('git', ['add', '.'], dir);
   await runCommand('git', ['commit', '--author="Pavel Puchkov <0x6368656174@gmail.com>"',
     '-m', '"Initial commit"'], dir);

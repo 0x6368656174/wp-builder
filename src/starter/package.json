@@ -4,8 +4,8 @@
   "author": "%AUTHOR_NAME% <%AUTHOR_EMAIL%>",
   "private": true,
   "scripts": {
-    "serve": "node_modules/.bin/wpbuild serve",
-    "build": "node_modules/.bin/wpbuild build --prod",
+    "serve": "wpbuild serve",
+    "build": "wpbuild build --prod",
     "pack": "tar --exclude='dist/wp-content/uploads' -czf dist.tar.gz dist",
     "lint": "wpbuild lint",
     "fix": "wpbuild prettify && wpbuild lint --fix",
