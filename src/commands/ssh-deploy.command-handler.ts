@@ -143,6 +143,23 @@ export async function handler(argv: IArgv) {
   const conn = await connect(argv);
   process.stdout.write(`Connect to remote SSH-server ${argv.user}@${argv.host} success\n\n`);
 
+  process.stdout.write('Open SFTP session...\n');
+  const sfpt = await getSftp(conn);
+  process.stdout.write('Open SFTP session success\n\n');
+
+  process.stdout.write(`Create archive folder ${argv.archiveFolder}...\n`);
+  await exec(conn, `mkdir -p ${argv.archiveFolder}`);
+  process.stdout.write(`Create archive folder ${argv.archiveFolder} success\n\n`);
+
+  process.stdout.write(`Pack dist folder ${join(process.cwd(), argv.dist)}...\n`);
+  const archive = await pack(argv.exclude, argv.dist);
+  process.stdout.write(`Pack dist folder ${join(process.cwd(), argv.dist)} to ${archive} success\n\n`);
+
+  const remoteArchive = join(argv.archiveFolder, basename(archive));
+  process.stdout.write(`Upload ${archive} to ${remoteArchive}...\n`);
+  await sftpUpload(sfpt, archive, remoteArchive);
+  process.stdout.write(`Upload ${archive} to ${remoteArchive} success\n\n`);
+
   const backupFolder = argv.backupFolder;
   process.stdout.write(`Create backup folder ${backupFolder}...\n`);
   await exec(conn, `mkdir -p ${backupFolder}`);
@@ -177,26 +194,9 @@ export async function handler(argv: IArgv) {
   await exec(conn, `rm -rf ${argv.remoteFolder}`);
   process.stdout.write(`Remove remote dir ${argv.remoteFolder} success\n\n`);
 
-  process.stdout.write(`Create archive folder ${argv.archiveFolder}...\n`);
-  await exec(conn, `mkdir -p ${argv.archiveFolder}`);
-  process.stdout.write(`Create archive folder ${argv.archiveFolder} success\n\n`);
-
   process.stdout.write(`Create remove folder ${argv.remoteFolder}...\n`);
   await exec(conn, `mkdir -p ${argv.remoteFolder}`);
   process.stdout.write(`Create remove folder ${argv.remoteFolder} success\n\n`);
-
-  process.stdout.write('Open SFTP session...\n');
-  const sfpt = await getSftp(conn);
-  process.stdout.write('Open SFTP session success\n\n');
-
-  process.stdout.write(`Pack dist folder ${join(process.cwd(), argv.dist)}...\n`);
-  const archive = await pack(argv.exclude, argv.dist);
-  process.stdout.write(`Pack dist folder ${join(process.cwd(), argv.dist)} to ${archive} success\n\n`);
-
-  const remoteArchive = join(argv.archiveFolder, basename(archive));
-  process.stdout.write(`Upload ${archive} to ${remoteArchive}...\n`);
-  await sftpUpload(sfpt, archive, remoteArchive);
-  process.stdout.write(`Upload ${archive} to ${remoteArchive} success\n\n`);
 
   process.stdout.write(`Remove ${archive}...\n`);
   unlinkSync(archive);
