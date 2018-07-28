@@ -36,7 +36,7 @@ export class CreateSplitChunksImportTemplatePlugin {
           .join('\n');
 
       const outputPath = (compiler.options.output || {}).path || '';
-      const viewsFolder = join(outputPath, 'views');
+      const viewsFolder = join(outputPath, 'Resources', 'views');
       if (!existsSync(viewsFolder)) {
         mkdirp.sync(viewsFolder);
       }

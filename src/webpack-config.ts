@@ -13,11 +13,12 @@ import { Configuration } from 'webpack';
 import {ComposerAutoloadFixPlugin} from './composer-autoload-fix.plugin';
 import { readConfig } from './config-read';
 import { CreateSplitChunksImportTemplatePlugin } from './create-split-chunks-import-template.plugin';
-import { JqueryDepedensePlugin } from './jquery-depedense.plugin';
+import { JqueryDependencePlugin } from './jquery-dependence.plugin';
 import { SuppressChunksPlugin } from './suppress-chunks.plugin';
 import {TimberFixPlugin} from './timber-fix.plugin';
 import { version } from './version';
 import SplitChunksOptions = webpack.Options.SplitChunksOptions;
+import {FunctionsPhpPlugin} from './functions-php.plugin';
 
 interface IConfigParams {
   mode: 'development' | 'production';
@@ -401,11 +402,16 @@ export function webpackConfig(params: IConfigParams): Configuration {
         test: /^style.css/,
       }),
       new SuppressChunksPlugin(),
-      new JqueryDepedensePlugin(),
+      new FunctionsPhpPlugin(),
       new CopyWebpackPlugin([
         ...getAsserts(),
         {
+          from: `functions.php`,
+          to: join(outputPath, '__functions.php'),
+        },
+        {
           from: `**/*.php`,
+          ignore: ['functions.php'],
           to: outputPath,
         },
         {
@@ -415,7 +421,6 @@ export function webpackConfig(params: IConfigParams): Configuration {
       ]),
       new CleanWebpackPlugin([outputPath], {root: join(process.cwd(), wpConfig.build.outputPath), verbose: false}),
       new CreateSplitChunksImportTemplatePlugin(),
-      new TimberFixPlugin(),
       new ComposerAutoloadFixPlugin(),
       // // Добавим глобальный объявления для jQuery
       new webpack.ProvidePlugin({
