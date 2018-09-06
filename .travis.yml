@@ -39,3 +39,6 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
+
+notifications:
+  slack: itquasar-ru:JAQxEmS0UV6A5myXyHg7wX9r
