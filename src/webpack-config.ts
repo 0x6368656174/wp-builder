@@ -77,15 +77,15 @@ export function webpackConfig(params: IConfigParams): Configuration {
   }
 
   function createSplitChunks(): SplitChunksOptions {
-    const breakpoints = Object.keys(theme.breakpoints || {});
-    const breakpointEnds = breakpoints.map(breakpoint => {
-      return [
-        `.${breakpoint}.scss`,
-        `.${breakpoint}.sass`,
-        `.${breakpoint}.css`,
-      ];
-    });
-    const breakpointFlatEnds = flatten(breakpointEnds);
+    // const breakpoints = Object.keys(theme.breakpoints || {});
+    // const breakpointEnds = breakpoints.map(breakpoint => {
+    //   return [
+    //     `.${breakpoint}.scss`,
+    //     `.${breakpoint}.sass`,
+    //     `.${breakpoint}.css`,
+    //   ];
+    // });
+    // const breakpointFlatEnds = flatten(breakpointEnds);
 
     const chunks: SplitChunksOptions = {
       cacheGroups: {
@@ -98,38 +98,38 @@ export function webpackConfig(params: IConfigParams): Configuration {
           priority: -10,
           test: /\.[jt]s$/,
         },
-        editorStyle: {
-          chunks: 'all',
-          enforce: true,
-          name: 'editor-style',
-          test: m => m.constructor.name === 'CssModule' && recursiveIssuerName(m) === 'editor-style',
-        },
-        // Все стили вынесем в style.css
-        style: {
-          chunks: 'all',
-          enforce: true,
-          name: 'style',
-          priority: -10,
-          test: m => {
-            if (m.constructor.name !== 'CssModule') {
-              return false;
-            }
-
-            if (recursiveIssuerName(m) === 'editor-style') {
-              return false;
-            }
-
-            const fileName = m.issuer.resource.toLowerCase();
-
-            for (const breakpointEnd of breakpointFlatEnds) {
-              if (fileName.endsWith(breakpointEnd)) {
-                return false;
-              }
-            }
-
-            return true;
-          },
-        },
+        // editorStyle: {
+        //   chunks: 'all',
+        //   enforce: true,
+        //   name: 'editor-style',
+        //   test: m => m.constructor.name === 'CssModule' && recursiveIssuerName(m) === 'editor-style',
+        // },
+        // // Все стили вынесем в style.css
+        // style: {
+        //   chunks: 'all',
+        //   enforce: true,
+        //   name: 'style',
+        //   priority: -10,
+        //   test: m => {
+        //     if (m.constructor.name !== 'CssModule') {
+        //       return false;
+        //     }
+        //
+        //     if (recursiveIssuerName(m) === 'editor-style') {
+        //       return false;
+        //     }
+        //
+        //     const fileName = m.issuer.resource.toLowerCase();
+        //
+        //     for (const breakpointEnd of breakpointFlatEnds) {
+        //       if (fileName.endsWith(breakpointEnd)) {
+        //         return false;
+        //       }
+        //     }
+        //
+        //     return true;
+        //   },
+        // },
         // В vendors.js будет содержаться все, что из node_modules
         vendors: {
           chunks: 'all',
@@ -140,33 +140,33 @@ export function webpackConfig(params: IConfigParams): Configuration {
       },
     };
 
-    for (const breakpoint of breakpoints) {
-      (chunks.cacheGroups as any)[`style.${breakpoint}`] = {
-        chunks: 'all',
-        enforce: true,
-        name: `style.${breakpoint}`,
-        priority: -10,
-        test: (m: any) => {
-          if (m.constructor.name !== 'CssModule') {
-            return false;
-          }
-
-          if (recursiveIssuerName(m) === 'editor-style') {
-            return false;
-          }
-
-          const fileName = m.issuer.resource.toLowerCase();
-
-          for (const breakpointEnd of breakpointFlatEnds) {
-            if (fileName.endsWith(breakpointEnd)) {
-              return true;
-            }
-          }
-
-          return false;
-        },
-      };
-    }
+    // for (const breakpoint of breakpoints) {
+    //   (chunks.cacheGroups as any)[`style.${breakpoint}`] = {
+    //     chunks: 'all',
+    //     enforce: true,
+    //     name: `style.${breakpoint}`,
+    //     priority: -10,
+    //     test: (m: any) => {
+    //       if (m.constructor.name !== 'CssModule') {
+    //         return false;
+    //       }
+    //
+    //       if (recursiveIssuerName(m) === 'editor-style') {
+    //         return false;
+    //       }
+    //
+    //       const fileName = m.issuer.resource.toLowerCase();
+    //
+    //       for (const breakpointEnd of breakpointFlatEnds) {
+    //         if (fileName.endsWith(breakpointEnd)) {
+    //           return true;
+    //         }
+    //       }
+    //
+    //       return false;
+    //     },
+    //   };
+    // }
 
     return chunks;
   }
@@ -406,16 +406,16 @@ export function webpackConfig(params: IConfigParams): Configuration {
       new CopyWebpackPlugin([
         ...getAsserts(),
         {
-          from: `functions.php`,
+          from: 'functions.php',
           to: join(outputPath, '__functions.php'),
         },
         {
-          from: `**/*.php`,
+          from: '**/*.php',
           ignore: ['functions.php'],
           to: outputPath,
         },
         {
-          from: `screenshot.png`,
+          from: 'screenshot.png',
           to: outputPath,
         },
       ]),
