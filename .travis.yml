@@ -1,12 +1,10 @@
 language: nodejs
-
 node_js:
-  - "node"
+  - node
 
 cache:
   directories:
   - node_modules
-
 before_script:
   - npm install
   - npm run build
@@ -41,4 +39,5 @@ deploy:
       tags: true
 
 notifications:
-  slack: itquasar-ru:JAQxEmS0UV6A5myXyHg7wX9r
+  slack:
+    secure: RzFfimDsOAdYWVA4ERv7uJZjoSjE+WJaFUIQcU+JtgXkVlCtiBEo9J+yUiBI3IXW9xMBC4n3rdjUYy37MXzbiSY0qPGEQxQ0iYbGICk/PE9P4R2FLUlQW0MW3cxbVMjzR6y4i4sVhzM2zC0h9Ldtz+raaN5OyeuNs3AKghxa5VulR8gj9Qcx68Y693TdDeBrFvse/sGT1cNB9ZAJ3X/oX+ImVwIT1MSnwk+Feu2vf7kEaWeG1x0JOQIiP9ssN20iRlz7lC3oG7cbEy0Qt2xpfOxsNksbGko4Q7P0yl7xtjK4SpmRY5Bib+2BfqfdSk+VU4Tr0SAptvotRubzk8Df47IwcEK0bjS+YvXCm5lse2goWH6Uh8ffwy/9BbZwwVT6l0iIwW+mB8QRsf51pF/328KQHW90C66bWutYxH/GFuy2QJ3/XIL6r9MTcXTIsCU916RgAsD84Msn0NHRJyKuGPFAZnRu/BpFQXn/Rkb+PdqU2bwx6hNjxAmh2MoJJYrWmkKzWpQs5mBVoi6uHKJ5AUMrAvkmKgWs1RRxRku84yXmdjL3yUjiUPYshsrIHK4TgXyUKrEo1c80cXQfvlbwDLg8Lb6W1nI7CKOjR/tSMOF8owDWyfc4i03eYuxxdGX0Lsr079o6B7IRk/BUmHJ5R7X4S1bywpWAE25rVKdzkLQ=
