@@ -186,6 +186,28 @@ export function webpackConfig(params: IConfigParams): Configuration {
     return styleCssContent.replace(/Version:.*/, `Version: ${versionString}`);
   }
 
+  const outputPluginsPath = resolve(process.cwd(), wpConfig.build.outputPath, `wp-content/plugins/`);
+  function getPlugins() {
+    if (!theme.usedPlugins) {
+      return [];
+    }
+    return theme.usedPlugins.map(plugin => {
+      if (!wpConfig.plugins) {
+        throw new Error('Not found plugins section in config');
+      }
+
+      const pluginConfig = wpConfig.plugins[plugin];
+      if (!pluginConfig) {
+        throw new Error(`Not found plugin "${plugin}" section in config`);
+      }
+
+      return {
+        from: join(process.cwd(), pluginConfig.root, '**/*'),
+        to: join(outputPluginsPath, plugin),
+      };
+    });
+  }
+
   function getAsserts() {
     const asserts = theme.asserts || [];
     return asserts.map(assert => {
@@ -405,6 +427,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
       new FunctionsPhpPlugin(),
       new CopyWebpackPlugin([
         ...getAsserts(),
+        ...getPlugins(),
         {
           from: 'functions.php',
           to: join(outputPath, '__functions.php'),

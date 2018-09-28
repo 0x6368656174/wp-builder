@@ -5,6 +5,10 @@ interface IBuild {
   outputPath: string;
 }
 
+interface IPlugin {
+  root: string;
+}
+
 interface ITheme {
   root: string;
   asserts?: string[];
@@ -12,6 +16,7 @@ interface ITheme {
   breakpoints?: {
     [breakpoint: string]: string;
   };
+  usedPlugins?: string[];
 }
 
 interface IConfig {
@@ -19,6 +24,9 @@ interface IConfig {
   build: IBuild;
   themes: {
     [name: string]: ITheme;
+  };
+  plugins?: {
+    [name: string]: IPlugin;
   };
   defaultTheme: string;
 }
