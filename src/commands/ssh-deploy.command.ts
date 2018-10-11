@@ -21,7 +21,7 @@ export const builder: {[key: string]: Options} = {
     type: 'string',
   },
   exclude: {
-    default: ['.htaccess', 'wp-config.php', 'wp-content/uploads'],
+    default: ['.htaccess', 'wp-config.php', 'wp-content/uploads', 'wp-content/languages'],
     describe: 'List of excluded files and folders',
     type: 'array',
   },
