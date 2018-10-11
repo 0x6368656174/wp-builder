@@ -82,6 +82,7 @@
     "@types/progress": "^2.0.1",
     "@types/shortid": "0.0.29",
     "@types/ssh2": "^0.5.35",
+    "@types/ssh2-streams": "^0.1.2",
     "@types/stylelint": "^9.4.0",
     "@types/svg2png": "^4.1.0",
     "@types/tar": "^4.0.0",
