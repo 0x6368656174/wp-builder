@@ -252,7 +252,7 @@ export async function handler(argv: IArgv) {
       const sshPassword = argv.password;
       const sshPort = argv.port;
       const sshUsername = argv.user;
-      const dist = join(process.cwd(), argv.dist);
+      const dist = join(process.cwd(), argv.dist) + '/';
 
       const rsh = privateKey
         ? `ssh -p ${sshPort} -i ${privateKey} ${argv.sshParams || ''}`
