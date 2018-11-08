@@ -5,13 +5,11 @@ export const describe = 'Deploy all dist files to remote SSH-server. To create d
 export const builder: {[key: string]: Options} = {
   archiveFolder: {
     alias: 'a',
-    demand: true,
     describe: 'Remote folder for archive',
     type: 'string',
   },
   backupFolder: {
     alias: 'b',
-    demand: true,
     describe: 'Remote folder for backup',
     type: 'string',
   },

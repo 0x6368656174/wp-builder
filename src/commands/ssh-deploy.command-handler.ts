@@ -12,13 +12,13 @@ import chalk from 'chalk';
 import {spawn} from 'child_process';
 
 interface IArgv {
-  archiveFolder: string;
+  archiveFolder?: string;
   exclude: string[];
   host: string;
   password?: string;
   port: number;
   remoteFolder: string;
-  backupFolder: string;
+  backupFolder?: string;
   user: string;
   keepClean: boolean;
   dist: string;
@@ -145,18 +145,26 @@ export async function handler(argv: IArgv) {
   const conn = await connect(argv);
   process.stdout.write(`Connect to remote SSH-server ${argv.user}@${argv.host} success\n\n`);
 
-  const backupFolder = argv.backupFolder;
-  process.stdout.write(`Create backup folder ${backupFolder}...\n`);
-  await exec(conn, `mkdir -p ${backupFolder}`);
-  process.stdout.write(`Create backup folder ${backupFolder} success\n\n`);
+  let backup = null;
 
-  const backup = join(backupFolder, `${project}-${moment().toISOString()}`);
-  process.stdout.write(`Try copy ${argv.remoteFolder} to backup ${backup}...\n`);
-  await exec(conn, `cp -r ${argv.remoteFolder} ${backup} || :`);
-  process.stdout.write(`Try copy ${argv.remoteFolder} to backup ${backup} success\n\n`);
+  if (argv.backupFolder) {
+    const backupFolder = argv.backupFolder;
+    process.stdout.write(`Create backup folder ${backupFolder}...\n`);
+    await exec(conn, `mkdir -p ${backupFolder}`);
+    process.stdout.write(`Create backup folder ${backupFolder} success\n\n`);
+
+    backup = join(backupFolder, `${project}-${moment().toISOString()}`);
+    process.stdout.write(`Try copy ${argv.remoteFolder} to backup ${backup}...\n`);
+    await exec(conn, `cp -r ${argv.remoteFolder} ${backup} || :`);
+    process.stdout.write(`Try copy ${argv.remoteFolder} to backup ${backup} success\n\n`);
+  }
 
   switch (argv.method) {
     case 'ssh-copy': {
+      if (!argv.archiveFolder) {
+        throw new Error('In ssh-copy deploy method --archive-folder command argument required');
+      }
+
       process.stdout.write('Open SFTP session...\n');
       const sfpt = await getSftp(conn);
       process.stdout.write('Open SFTP session success\n\n');
@@ -299,9 +307,11 @@ export async function handler(argv: IArgv) {
   }
 
   if (argv.keepClean) {
-    process.stdout.write(`Try remove backup ${backup}...\n`);
-    await exec(conn, `rm -rf ${backup}`);
-    process.stdout.write(`Try remove backup ${backup} success...\n\n`);
+    if (backup) {
+      process.stdout.write(`Try remove backup ${backup}...\n`);
+      await exec(conn, `rm -rf ${backup}`);
+      process.stdout.write(`Try remove backup ${backup} success...\n\n`);
+    }
   }
 
   process.stdout.write(`Deploy finished\n`);
