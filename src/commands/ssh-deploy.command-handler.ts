@@ -299,7 +299,7 @@ export async function handler(argv: IArgv) {
           resolve();
         });
       }));
-      process.stdout.write(`Rsync success...\n`);
+      process.stdout.write(`Rsync success...\n\n`);
     } break;
   }
 
