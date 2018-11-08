@@ -284,11 +284,11 @@ export async function handler(argv: IArgv) {
         });
 
         rsync.stdout.on('data', data => {
-          process.stdout.write(`rsync: ${data.toString()}\n`);
+          process.stdout.write(data.toString());
         });
 
         rsync.stderr.on('data', data => {
-          process.stderr.write(`rsync: ${data.toString()}\n`);
+          process.stderr.write(data.toString());
         });
 
         rsync.on('exit', code => {
