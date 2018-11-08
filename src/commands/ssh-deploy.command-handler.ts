@@ -283,16 +283,16 @@ export async function handler(argv: IArgv) {
         });
 
         rsync.stdout.on('data', data => {
-          process.stdout.write(`rsync: ${data.toString()}`);
+          process.stdout.write(`rsync: ${data.toString()}\n`);
         });
 
         rsync.stderr.on('data', data => {
-          process.stderr.write(`rsync: ${data.toString()}`);
+          process.stderr.write(`rsync: ${data.toString()}\n`);
         });
 
         rsync.on('exit', code => {
           if (code !== 0) {
-            reject(`Rsync complete with code = ${code}`);
+            reject(`Rsync complete with code = ${code}\n`);
           }
 
           resolve();
