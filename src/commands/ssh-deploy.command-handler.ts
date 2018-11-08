@@ -18,7 +18,7 @@ interface IArgv {
   password?: string;
   port: number;
   remoteFolder: string;
-  backupFolder?: string;
+  backupFolder: string;
   user: string;
   keepClean: boolean;
   dist: string;
@@ -145,19 +145,15 @@ export async function handler(argv: IArgv) {
   const conn = await connect(argv);
   process.stdout.write(`Connect to remote SSH-server ${argv.user}@${argv.host} success\n\n`);
 
-  let backup = null;
+  const backupFolder = argv.backupFolder;
+  process.stdout.write(`Create backup folder ${backupFolder}...\n`);
+  await exec(conn, `mkdir -p ${backupFolder}`);
+  process.stdout.write(`Create backup folder ${backupFolder} success\n\n`);
 
-  if (argv.backupFolder) {
-    const backupFolder = argv.backupFolder;
-    process.stdout.write(`Create backup folder ${backupFolder}...\n`);
-    await exec(conn, `mkdir -p ${backupFolder}`);
-    process.stdout.write(`Create backup folder ${backupFolder} success\n\n`);
-
-    backup = join(backupFolder, `${project}-${moment().toISOString()}`);
-    process.stdout.write(`Try copy ${argv.remoteFolder} to backup ${backup}...\n`);
-    await exec(conn, `cp -r ${argv.remoteFolder} ${backup} || :`);
-    process.stdout.write(`Try copy ${argv.remoteFolder} to backup ${backup} success\n\n`);
-  }
+  const backup = join(backupFolder, `${project}-${moment().toISOString()}`);
+  process.stdout.write(`Try copy ${argv.remoteFolder} to backup ${backup}...\n`);
+  await exec(conn, `cp -r ${argv.remoteFolder} ${backup} || :`);
+  process.stdout.write(`Try copy ${argv.remoteFolder} to backup ${backup} success\n\n`);
 
   switch (argv.method) {
     case 'ssh-copy': {
@@ -307,11 +303,9 @@ export async function handler(argv: IArgv) {
   }
 
   if (argv.keepClean) {
-    if (backup) {
-      process.stdout.write(`Try remove backup ${backup}...\n`);
-      await exec(conn, `rm -rf ${backup}`);
-      process.stdout.write(`Try remove backup ${backup} success...\n\n`);
-    }
+    process.stdout.write(`Try remove backup ${backup}...\n`);
+    await exec(conn, `rm -rf ${backup}`);
+    process.stdout.write(`Try remove backup ${backup} success...\n\n`);
   }
 
   process.stdout.write(`Deploy finished\n`);

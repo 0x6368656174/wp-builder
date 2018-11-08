@@ -10,6 +10,7 @@ export const builder: {[key: string]: Options} = {
   },
   backupFolder: {
     alias: 'b',
+    demand: true,
     describe: 'Remote folder for backup',
     type: 'string',
   },
