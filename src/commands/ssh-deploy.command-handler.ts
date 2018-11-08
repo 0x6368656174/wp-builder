@@ -9,6 +9,7 @@ import { readConfig } from '../config-read';
 import { version } from '../version';
 import { generate } from 'shortid';
 import chalk from 'chalk';
+import {spawn} from 'child_process';
 
 interface IArgv {
   archiveFolder: string;
@@ -22,6 +23,7 @@ interface IArgv {
   keepClean: boolean;
   dist: string;
   privateKey?: string;
+  method: 'ssh-copy' | 'rsync';
 }
 
 async function pack(excludes: string[], dist: string): Promise<string> {
@@ -143,23 +145,6 @@ export async function handler(argv: IArgv) {
   const conn = await connect(argv);
   process.stdout.write(`Connect to remote SSH-server ${argv.user}@${argv.host} success\n\n`);
 
-  process.stdout.write('Open SFTP session...\n');
-  const sfpt = await getSftp(conn);
-  process.stdout.write('Open SFTP session success\n\n');
-
-  process.stdout.write(`Create archive folder ${argv.archiveFolder}...\n`);
-  await exec(conn, `mkdir -p ${argv.archiveFolder}`);
-  process.stdout.write(`Create archive folder ${argv.archiveFolder} success\n\n`);
-
-  process.stdout.write(`Pack dist folder ${join(process.cwd(), argv.dist)}...\n`);
-  const archive = await pack(argv.exclude, argv.dist);
-  process.stdout.write(`Pack dist folder ${join(process.cwd(), argv.dist)} to ${archive} success\n\n`);
-
-  const remoteArchive = join(argv.archiveFolder, basename(archive));
-  process.stdout.write(`Upload ${archive} to ${remoteArchive}...\n`);
-  await sftpUpload(sfpt, archive, remoteArchive);
-  process.stdout.write(`Upload ${archive} to ${remoteArchive} success\n\n`);
-
   const backupFolder = argv.backupFolder;
   process.stdout.write(`Create backup folder ${backupFolder}...\n`);
   await exec(conn, `mkdir -p ${backupFolder}`);
@@ -170,71 +155,156 @@ export async function handler(argv: IArgv) {
   await exec(conn, `cp -r ${argv.remoteFolder} ${backup} || :`);
   process.stdout.write(`Try copy ${argv.remoteFolder} to backup ${backup} success\n\n`);
 
-  const excluded = argv.exclude.map(e => normalize(e));
+  switch (argv.method) {
+    case 'ssh-copy': {
+      process.stdout.write('Open SFTP session...\n');
+      const sfpt = await getSftp(conn);
+      process.stdout.write('Open SFTP session success\n\n');
 
-  const excludeTmpDirs: {[key: string]: string} = {};
+      process.stdout.write(`Create archive folder ${argv.archiveFolder}...\n`);
+      await exec(conn, `mkdir -p ${argv.archiveFolder}`);
+      process.stdout.write(`Create archive folder ${argv.archiveFolder} success\n\n`);
 
-  for (const exclude of excluded) {
-    const tempDir = join('/', 'tmp', `wpbuild-${generate()}`);
-    process.stdout.write(`Create temp dir ${tempDir}...\n`);
-    await exec(conn, `mkdir -p ${tempDir}`);
-    excludeTmpDirs[exclude] = tempDir;
-    process.stdout.write(`Create temp dir ${tempDir} success...\n\n`);
+      process.stdout.write(`Pack dist folder ${join(process.cwd(), argv.dist)}...\n`);
+      const archive = await pack(argv.exclude, argv.dist);
+      process.stdout.write(`Pack dist folder ${join(process.cwd(), argv.dist)} to ${archive} success\n\n`);
+
+      const remoteArchive = join(argv.archiveFolder, basename(archive));
+      process.stdout.write(`Upload ${archive} to ${remoteArchive}...\n`);
+      await sftpUpload(sfpt, archive, remoteArchive);
+      process.stdout.write(`Upload ${archive} to ${remoteArchive} success\n\n`);
+
+      const excluded = argv.exclude.map(e => normalize(e));
+
+      const excludeTmpDirs: {[key: string]: string} = {};
+
+      for (const exclude of excluded) {
+        const tempDir = join('/', 'tmp', `wpbuild-${generate()}`);
+        process.stdout.write(`Create temp dir ${tempDir}...\n`);
+        await exec(conn, `mkdir -p ${tempDir}`);
+        excludeTmpDirs[exclude] = tempDir;
+        process.stdout.write(`Create temp dir ${tempDir} success...\n\n`);
+      }
+
+      for (const exclude of excluded) {
+        const from = join(argv.remoteFolder, exclude);
+        const to = join(excludeTmpDirs[exclude], basename(exclude));
+        process.stdout.write(`Try move ${from} to ${to}...\n`);
+        await exec(conn, `mv ${from} ${to} || :`);
+        process.stdout.write(`Try move ${from} to ${to} success\n\n`);
+      }
+
+      process.stdout.write(`Remove remote dir ${argv.remoteFolder}...\n`);
+      await exec(conn, `rm -rf ${argv.remoteFolder}`);
+      process.stdout.write(`Remove remote dir ${argv.remoteFolder} success\n\n`);
+
+      process.stdout.write(`Create remove folder ${argv.remoteFolder}...\n`);
+      await exec(conn, `mkdir -p ${argv.remoteFolder}`);
+      process.stdout.write(`Create remove folder ${argv.remoteFolder} success\n\n`);
+
+      process.stdout.write(`Remove ${archive}...\n`);
+      unlinkSync(archive);
+      process.stdout.write(`Remove ${archive} success\n\n`);
+
+      const archiveFolder = dirname(archive);
+      process.stdout.write(`Remove ${archiveFolder}...\n`);
+      rmdirSync(archiveFolder);
+      process.stdout.write(`Remove ${archiveFolder} success\n\n`);
+
+      process.stdout.write(`Unpack ${remoteArchive} to ${argv.remoteFolder}...\n`);
+      await exec(conn, `tar -xzf ${remoteArchive} -C ${argv.remoteFolder}`);
+      process.stdout.write(`Unpack ${remoteArchive} to ${argv.remoteFolder} success\n\n`);
+
+      for (const exclude of excluded) {
+        const tempDir = excludeTmpDirs[exclude];
+        const from = join(tempDir, basename(exclude));
+        const to = join(argv.remoteFolder, exclude);
+        process.stdout.write(`Try move ${from} to ${to}...\n`);
+        await exec(conn, `mv ${from} ${to} || :`);
+        process.stdout.write(`Try move ${from} to ${to} success\n\n`);
+
+        process.stdout.write(`Remove temp dir ${tempDir}...\n`);
+        await exec(conn, `rm -r ${tempDir}`);
+        process.stdout.write(`Remove temp dir ${tempDir} success\n\n`);
+      }
+
+      if (argv.keepClean) {
+        process.stdout.write(`Try remove archive ${remoteArchive}...\n`);
+        await exec(conn, `rm -rf ${remoteArchive}`);
+        process.stdout.write(`Try remove archive ${remoteArchive} success...\n\n`);
+      }
+    } break;
+    case 'rsync': {
+      const privateKey = argv.privateKey;
+
+      if (privateKey) {
+        if (!existsSync(privateKey)) {
+          throw new Error(`Not found ${privateKey}`);
+        }
+      }
+
+      const sshHost = argv.host;
+      const sshPassword = argv.password;
+      const sshPort = argv.port;
+      const sshUsername = argv.user;
+      const dist = join(process.cwd(), argv.dist);
+
+      const rsh = privateKey
+        ? `/usr/bin/ssh -l ${sshUsername} -p ${sshPort} -i ${privateKey}`
+        : `sshpass -p ${sshPassword} ssh -p ${sshPort}`;
+
+      const excluded = argv.exclude.map(e => normalize(e));
+      const exclude = excluded.map(e => `--exclude="${e}"`);
+
+      const rsyncArgs = [
+        '--verbose',
+        '--recursive',
+        '--links',
+        '--times',
+        '--update',
+        '--compress',
+        '--checksum',
+        '--delete-after',
+        `--rsh="${rsh}"`,
+        ...exclude,
+        dist,
+        `${sshUsername}@${sshHost}:${argv.remoteFolder}`,
+      ];
+      const rsyncCommand = `rsync ${rsyncArgs.join(' ')}`;
+
+      process.stdout.write(`Run rsync "${rsyncCommand}"...\n`);
+      await (new Promise((resolve, reject) => {
+        const rsync = spawn('rsync', rsyncArgs, {
+          shell: true,
+        });
+
+        rsync.stdout.on('data', data => {
+          process.stdout.write(`rsync: ${data.toString()}`);
+        });
+
+        rsync.stderr.on('data', data => {
+          process.stderr.write(`rsync: ${data.toString()}`);
+        });
+
+        rsync.on('exit', code => {
+          if (code !== 0) {
+            reject(`Rsync complete with code = ${code}`);
+          }
+
+          resolve();
+        });
+      }));
+      process.stdout.write(`Rsync success...\n`);
+    } break;
   }
-
-  for (const exclude of excluded) {
-    const from = join(argv.remoteFolder, exclude);
-    const to = join(excludeTmpDirs[exclude], basename(exclude));
-    process.stdout.write(`Try move ${from} to ${to}...\n`);
-    await exec(conn, `mv ${from} ${to} || :`);
-    process.stdout.write(`Try move ${from} to ${to} success\n\n`);
-  }
-
-  process.stdout.write(`Remove remote dir ${argv.remoteFolder}...\n`);
-  await exec(conn, `rm -rf ${argv.remoteFolder}`);
-  process.stdout.write(`Remove remote dir ${argv.remoteFolder} success\n\n`);
-
-  process.stdout.write(`Create remove folder ${argv.remoteFolder}...\n`);
-  await exec(conn, `mkdir -p ${argv.remoteFolder}`);
-  process.stdout.write(`Create remove folder ${argv.remoteFolder} success\n\n`);
-
-  process.stdout.write(`Remove ${archive}...\n`);
-  unlinkSync(archive);
-  process.stdout.write(`Remove ${archive} success\n\n`);
-
-  const archiveFolder = dirname(archive);
-  process.stdout.write(`Remove ${archiveFolder}...\n`);
-  rmdirSync(archiveFolder);
-  process.stdout.write(`Remove ${archiveFolder} success\n\n`);
-
-  process.stdout.write(`Unpack ${remoteArchive} to ${argv.remoteFolder}...\n`);
-  await exec(conn, `tar -xzf ${remoteArchive} -C ${argv.remoteFolder}`);
-  process.stdout.write(`Unpack ${remoteArchive} to ${argv.remoteFolder} success\n\n`);
-
-  for (const exclude of excluded) {
-    const tempDir = excludeTmpDirs[exclude];
-    const from = join(tempDir, basename(exclude));
-    const to = join(argv.remoteFolder, exclude);
-    process.stdout.write(`Try move ${from} to ${to}...\n`);
-    await exec(conn, `mv ${from} ${to} || :`);
-    process.stdout.write(`Try move ${from} to ${to} success\n\n`);
-
-    process.stdout.write(`Remove temp dir ${tempDir}...\n`);
-    await exec(conn, `rm -r ${tempDir}`);
-    process.stdout.write(`Remove temp dir ${tempDir} success\n\n`);
-  }
-
-  process.stdout.write(`Deploy finished\n`);
 
   if (argv.keepClean) {
     process.stdout.write(`Try remove backup ${backup}...\n`);
     await exec(conn, `rm -rf ${backup}`);
     process.stdout.write(`Try remove backup ${backup} success...\n\n`);
-
-    process.stdout.write(`Try remove archive ${remoteArchive}...\n`);
-    await exec(conn, `rm -rf ${remoteArchive}`);
-    process.stdout.write(`Try remove archive ${remoteArchive} success...\n\n`);
   }
+
+  process.stdout.write(`Deploy finished\n`);
 
   conn.end();
 

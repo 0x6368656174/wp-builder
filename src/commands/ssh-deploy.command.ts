@@ -47,6 +47,7 @@ export const builder: {[key: string]: Options} = {
     type: 'number',
   },
   privateKey: {
+    alias: 'i',
     describe: 'Private key for either key-based or hostbased user authentication',
     type: 'string',
   },
@@ -60,6 +61,11 @@ export const builder: {[key: string]: Options} = {
     alias: 'u',
     demand: true,
     describe: 'SSH user',
+    type: 'string',
+  },
+  method: {
+    default: 'ssh-copy',
+    describe: 'Deploy method (ssh-copy, rsync)',
     type: 'string',
   },
 };
