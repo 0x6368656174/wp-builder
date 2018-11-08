@@ -24,6 +24,7 @@ interface IArgv {
   dist: string;
   privateKey?: string;
   method: 'ssh-copy' | 'rsync';
+  sshParams?: string;
 }
 
 async function pack(excludes: string[], dist: string): Promise<string> {
@@ -254,8 +255,8 @@ export async function handler(argv: IArgv) {
       const dist = join(process.cwd(), argv.dist);
 
       const rsh = privateKey
-        ? `/usr/bin/ssh -l ${sshUsername} -p ${sshPort} -i ${privateKey}`
-        : `sshpass -p ${sshPassword} ssh -p ${sshPort}`;
+        ? `ssh -p ${sshPort} -i ${privateKey} ${argv.sshParams || ''}`
+        : `sshpass -p ${sshPassword} ssh -p ${sshPort} ${argv.sshParams || ''}`;
 
       const excluded = argv.exclude.map(e => normalize(e));
       const exclude = excluded.map(e => `--exclude="${e}"`);

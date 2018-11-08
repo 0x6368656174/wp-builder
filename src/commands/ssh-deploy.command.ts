@@ -35,6 +35,11 @@ export const builder: {[key: string]: Options} = {
     describe: 'Remove all temporary files from remote server after success deployment',
     type: 'boolean',
   },
+  method: {
+    default: 'ssh-copy',
+    describe: 'Deploy method (ssh-copy, rsync)',
+    type: 'string',
+  },
   password: {
     alias: 'p',
     describe: 'SSH password',
@@ -56,15 +61,14 @@ export const builder: {[key: string]: Options} = {
     describe: 'Remote folder to upload',
     type: 'string',
   },
+  sshParams: {
+    describe: 'SSH connect params (example "-oStrictHostKeyChecking=no")',
+    type: 'string',
+  },
   user: {
     alias: 'u',
     demand: true,
     describe: 'SSH user',
-    type: 'string',
-  },
-  method: {
-    default: 'ssh-copy',
-    describe: 'Deploy method (ssh-copy, rsync)',
     type: 'string',
   },
 };
