@@ -5,14 +5,14 @@ import { webpackConfig } from '../webpack-config';
 interface IArgv {
   prod: boolean;
   theme?: string;
-  deployUrl?: string;
+  'deploy-url'?: string;
 }
 
 export function handler(argv: IArgv) {
   const mode = argv.prod ? 'production' : 'development';
   const theme = argv.theme;
 
-  webpack(webpackConfig({mode, theme, deployUrl: argv.deployUrl}), (err: any, stats: any) => {
+  webpack(webpackConfig({mode, theme, deployUrl: argv['deploy-url']}), (err: any, stats: any) => {
     if (err) {
       process.stderr.write(err + '\n');
       process.exit(1);

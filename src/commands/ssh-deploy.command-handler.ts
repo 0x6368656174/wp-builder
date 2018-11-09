@@ -1,30 +1,30 @@
-import { createReadStream, existsSync, mkdtempSync, rmdirSync, unlinkSync, readFileSync} from 'fs';
+import chalk from 'chalk';
+import {spawn} from 'child_process';
+import { createReadStream, existsSync, mkdtempSync, readFileSync, rmdirSync, unlinkSync} from 'fs';
 import * as moment from 'moment';
 import { tmpdir } from 'os';
 import { basename, dirname, join, normalize} from 'path';
+import { generate } from 'shortid';
 import { Client, SFTPWrapper } from 'ssh2';
 import { FileEntry } from 'ssh2-streams';
 import { create } from 'tar';
 import { readConfig } from '../config-read';
 import { version } from '../version';
-import { generate } from 'shortid';
-import chalk from 'chalk';
-import {spawn} from 'child_process';
 
 interface IArgv {
-  archiveFolder?: string;
+  'archive-folder'?: string;
   exclude: string[];
   host: string;
   password?: string;
   port: number;
-  remoteFolder: string;
-  backupFolder: string;
+  'remote-folder': string;
+  'backup-folder': string;
   user: string;
-  keepClean: boolean;
+  'keep-clean': boolean;
   dist: string;
-  privateKey?: string;
+  'ssh-private-key'?: string;
   method: 'ssh-copy' | 'rsync';
-  sshParams?: string;
+  'ssh-host-key-checking': boolean;
 }
 
 async function pack(excludes: string[], dist: string): Promise<string> {
@@ -51,14 +51,15 @@ async function pack(excludes: string[], dist: string): Promise<string> {
 }
 
 function connect(argv: IArgv): Promise<Client> {
+  const privateKeyPath = argv['ssh-private-key'];
   let privateKey: string;
 
-  if (argv.privateKey) {
-    if (!existsSync(argv.privateKey)) {
-      throw new Error(`Not found ${argv.privateKey}`);
+  if (privateKeyPath) {
+    if (!existsSync(privateKeyPath)) {
+      throw new Error(`Not found ${privateKeyPath}`);
     }
 
-    privateKey = readFileSync(argv.privateKey, 'utf-8');
+    privateKey = readFileSync(privateKeyPath, 'utf-8');
   }
 
   return new Promise((resolve, reject) => {
@@ -146,19 +147,23 @@ export async function handler(argv: IArgv) {
   const conn = await connect(argv);
   process.stdout.write(`Connect to remote SSH-server ${argv.user}@${argv.host} success\n\n`);
 
-  const backupFolder = argv.backupFolder;
+  const backupFolder = argv['backup-folder'];
   process.stdout.write(`Create backup folder ${backupFolder}...\n`);
   await exec(conn, `mkdir -p ${backupFolder}`);
   process.stdout.write(`Create backup folder ${backupFolder} success\n\n`);
-
   const backup = join(backupFolder, `${project}-${moment().toISOString()}`);
-  process.stdout.write(`Try copy ${argv.remoteFolder} to backup ${backup}...\n`);
-  await exec(conn, `cp -r ${argv.remoteFolder} ${backup} || :`);
-  process.stdout.write(`Try copy ${argv.remoteFolder} to backup ${backup} success\n\n`);
+
+  const remoteFolder = argv['remote-folder'];
+  process.stdout.write(`Try copy ${remoteFolder} to backup ${backup}...\n`);
+  await exec(conn, `cp -r ${remoteFolder} ${backup} || :`);
+  process.stdout.write(`Try copy ${remoteFolder} to backup ${backup} success\n\n`);
+
+  const archiveFolder = argv['archive-folder'];
+  const keepClean = argv['keep-clean'];
 
   switch (argv.method) {
     case 'ssh-copy': {
-      if (!argv.archiveFolder) {
+      if (!archiveFolder) {
         throw new Error('In ssh-copy deploy method --archive-folder command argument required');
       }
 
@@ -166,15 +171,15 @@ export async function handler(argv: IArgv) {
       const sfpt = await getSftp(conn);
       process.stdout.write('Open SFTP session success\n\n');
 
-      process.stdout.write(`Create archive folder ${argv.archiveFolder}...\n`);
-      await exec(conn, `mkdir -p ${argv.archiveFolder}`);
-      process.stdout.write(`Create archive folder ${argv.archiveFolder} success\n\n`);
+      process.stdout.write(`Create archive folder ${archiveFolder}...\n`);
+      await exec(conn, `mkdir -p ${archiveFolder}`);
+      process.stdout.write(`Create archive folder ${archiveFolder} success\n\n`);
 
       process.stdout.write(`Pack dist folder ${join(process.cwd(), argv.dist)}...\n`);
       const archive = await pack(argv.exclude, argv.dist);
       process.stdout.write(`Pack dist folder ${join(process.cwd(), argv.dist)} to ${archive} success\n\n`);
 
-      const remoteArchive = join(argv.archiveFolder, basename(archive));
+      const remoteArchive = join(archiveFolder, basename(archive));
       process.stdout.write(`Upload ${archive} to ${remoteArchive}...\n`);
       await sftpUpload(sfpt, archive, remoteArchive);
       process.stdout.write(`Upload ${archive} to ${remoteArchive} success\n\n`);
@@ -192,38 +197,38 @@ export async function handler(argv: IArgv) {
       }
 
       for (const exclude of excluded) {
-        const from = join(argv.remoteFolder, exclude);
+        const from = join(remoteFolder, exclude);
         const to = join(excludeTmpDirs[exclude], basename(exclude));
         process.stdout.write(`Try move ${from} to ${to}...\n`);
         await exec(conn, `mv ${from} ${to} || :`);
         process.stdout.write(`Try move ${from} to ${to} success\n\n`);
       }
 
-      process.stdout.write(`Remove remote dir ${argv.remoteFolder}...\n`);
-      await exec(conn, `rm -rf ${argv.remoteFolder}`);
-      process.stdout.write(`Remove remote dir ${argv.remoteFolder} success\n\n`);
+      process.stdout.write(`Remove remote dir ${remoteFolder}...\n`);
+      await exec(conn, `rm -rf ${remoteFolder}`);
+      process.stdout.write(`Remove remote dir ${remoteFolder} success\n\n`);
 
-      process.stdout.write(`Create remove folder ${argv.remoteFolder}...\n`);
-      await exec(conn, `mkdir -p ${argv.remoteFolder}`);
-      process.stdout.write(`Create remove folder ${argv.remoteFolder} success\n\n`);
+      process.stdout.write(`Create remove folder ${remoteFolder}...\n`);
+      await exec(conn, `mkdir -p ${remoteFolder}`);
+      process.stdout.write(`Create remove folder ${remoteFolder} success\n\n`);
 
       process.stdout.write(`Remove ${archive}...\n`);
       unlinkSync(archive);
       process.stdout.write(`Remove ${archive} success\n\n`);
 
-      const archiveFolder = dirname(archive);
-      process.stdout.write(`Remove ${archiveFolder}...\n`);
-      rmdirSync(archiveFolder);
-      process.stdout.write(`Remove ${archiveFolder} success\n\n`);
+      const archiveFolderDir = dirname(archive);
+      process.stdout.write(`Remove ${archiveFolderDir}...\n`);
+      rmdirSync(archiveFolderDir);
+      process.stdout.write(`Remove ${archiveFolderDir} success\n\n`);
 
-      process.stdout.write(`Unpack ${remoteArchive} to ${argv.remoteFolder}...\n`);
-      await exec(conn, `tar -xzf ${remoteArchive} -C ${argv.remoteFolder}`);
-      process.stdout.write(`Unpack ${remoteArchive} to ${argv.remoteFolder} success\n\n`);
+      process.stdout.write(`Unpack ${remoteArchive} to ${remoteFolder}...\n`);
+      await exec(conn, `tar -xzf ${remoteArchive} -C ${remoteFolder}`);
+      process.stdout.write(`Unpack ${remoteArchive} to ${remoteFolder} success\n\n`);
 
       for (const exclude of excluded) {
         const tempDir = excludeTmpDirs[exclude];
         const from = join(tempDir, basename(exclude));
-        const to = join(argv.remoteFolder, exclude);
+        const to = join(remoteFolder, exclude);
         process.stdout.write(`Try move ${from} to ${to}...\n`);
         await exec(conn, `mv ${from} ${to} || :`);
         process.stdout.write(`Try move ${from} to ${to} success\n\n`);
@@ -233,18 +238,18 @@ export async function handler(argv: IArgv) {
         process.stdout.write(`Remove temp dir ${tempDir} success\n\n`);
       }
 
-      if (argv.keepClean) {
+      if (keepClean) {
         process.stdout.write(`Try remove archive ${remoteArchive}...\n`);
         await exec(conn, `rm -rf ${remoteArchive}`);
         process.stdout.write(`Try remove archive ${remoteArchive} success...\n\n`);
       }
-    } break;
+    }                break;
     case 'rsync': {
-      const privateKey = argv.privateKey;
+      const sshPrivateKey = argv['ssh-private-key'];
 
-      if (privateKey) {
-        if (!existsSync(privateKey)) {
-          throw new Error(`Not found ${privateKey}`);
+      if (sshPrivateKey) {
+        if (!existsSync(sshPrivateKey)) {
+          throw new Error(`Not found ${sshPrivateKey}`);
         }
       }
 
@@ -254,9 +259,12 @@ export async function handler(argv: IArgv) {
       const sshUsername = argv.user;
       const dist = join(process.cwd(), argv.dist) + '/';
 
-      const rsh = privateKey
-        ? `ssh -p ${sshPort} -i ${privateKey} ${argv.sshParams || ''}`
-        : `sshpass -p ${sshPassword} ssh -p ${sshPort} ${argv.sshParams || ''}`;
+      const sshHostKeyChecking = argv['ssh-host-key-checking'];
+      const sshParams = `-oStrictHostKeyChecking=${sshHostKeyChecking ? 'yes' : 'no'}`;
+
+      const rsh = sshPrivateKey
+        ? `ssh -p ${sshPort} -i ${sshPrivateKey} ${sshParams}`
+        : `sshpass -p ${sshPassword} ssh -p ${sshPort} ${sshParams}`;
 
       const excluded = argv.exclude.map(e => normalize(e));
       const exclude = excluded.map(e => `--exclude="${e}"`);
@@ -273,7 +281,7 @@ export async function handler(argv: IArgv) {
         `--rsh="${rsh}"`,
         ...exclude,
         dist,
-        `${sshUsername}@${sshHost}:${argv.remoteFolder}`,
+        `${sshUsername}@${sshHost}:${remoteFolder}`,
       ];
       const rsyncCommand = `rsync ${rsyncArgs.join(' ')}`;
 
@@ -300,10 +308,10 @@ export async function handler(argv: IArgv) {
         });
       }));
       process.stdout.write(`Rsync success...\n\n`);
-    } break;
+    }             break;
   }
 
-  if (argv.keepClean) {
+  if (keepClean) {
     process.stdout.write(`Try remove backup ${backup}...\n`);
     await exec(conn, `rm -rf ${backup}`);
     process.stdout.write(`Try remove backup ${backup} success...\n\n`);

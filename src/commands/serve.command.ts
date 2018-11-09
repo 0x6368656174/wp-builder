@@ -3,32 +3,32 @@ import { Options } from 'yargs';
 export const command = 'serve';
 export const describe = 'Run site local';
 export const builder: {[key: string]: Options} = {
-  deployUrl: {
+  'deploy-url': {
     describe: 'URL where files will be deployed',
     type: 'string',
   },
-  host: {
+  'host': {
     default: 'localhost',
     describe: 'Host',
     type: 'string',
   },
-  port: {
+  'port': {
     default: 4200,
     describe: 'Port',
     type: 'number',
   },
-  prod: {
+  'prod': {
     alias: 'p',
     default: false,
     describe: 'Build in production mode',
     type: 'boolean',
   },
-  theme: {
+  'theme': {
     alias: 't',
     describe: 'Theme for build',
     type: 'string',
   },
-  updatePort: {
+  'updatePort': {
     default: 4201,
     describe: 'Port for webpack live update server',
     type: 'number',

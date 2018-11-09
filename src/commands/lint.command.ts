@@ -3,18 +3,18 @@ import { Options } from 'yargs';
 export const command = 'lint [files..]';
 export const describe = 'Lint project';
 export const builder: { [key: string]: Options } = {
-  files: {
+  'files': {
     alias: 'f',
     default: [],
     description: 'Files to lint',
     type: 'array',
   },
-  fix: {
+  'fix': {
     default: false,
     description: 'Fix errors',
     type: 'boolean',
   },
-  showAll: {
+  'show-all': {
     default: false,
     description: 'Show all processed files',
     type: 'boolean',

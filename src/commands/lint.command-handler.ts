@@ -8,7 +8,7 @@ import {runCommand} from './utils';
 
 interface IArgv {
   files?: string[];
-  showAll: boolean;
+  'show-all': boolean;
   fix: boolean;
 }
 
@@ -112,7 +112,11 @@ async function lintTs(ts: string[], fix: boolean, showAll: boolean): Promise<boo
   return result;
 }
 
-export async function handler({ files, fix, showAll }: IArgv) {
+export async function handler(argv: IArgv) {
+  const fix = argv.fix;
+  const showAll = argv['show-all'];
+
+  let files = argv.files;
   if (!files || files.length === 0) {
     files = glob.sync(join(process.cwd(), 'src', '**/*'));
   }

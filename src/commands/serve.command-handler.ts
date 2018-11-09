@@ -12,10 +12,10 @@ import { webpackConfig } from '../webpack-config';
 interface IArgv {
   host: string;
   port: number;
-  updatePort: number;
+  'update-port': number;
   prod: boolean;
   theme?: string;
-  deployUrl?: string;
+  'deploy-url'?: string;
 }
 
 function getRandomInt(min: number, max: number) {
@@ -47,13 +47,13 @@ export function handler(argv: IArgv) {
   const dist = join(process.cwd(), config.build.outputPath);
   const themeName = theme || config.defaultTheme;
 
-  const router = createRouterPhp({theme: themeName, host: argv.host, updatePort: argv.updatePort});
+  const router = createRouterPhp({theme: themeName, host: argv.host, updatePort: argv['update-port']});
 
   const php = spawn('php', ['-S', `${argv.host}:${argv.port}`, '-t', dist, router], {cwd: process.cwd(), env: process.env});
   php.stdout.on('data', data => process.stdout.write(`PHP: ${data}`));
   php.stderr.on('data', data => process.stderr.write(`PHP: ${data}`));
 
-  const wpConfig = webpackConfig({mode, theme, serve: true, deployUrl: argv.deployUrl});
+  const wpConfig = webpackConfig({mode, theme, serve: true, deployUrl: argv['deploy-url']});
   if (!wpConfig.plugins) {
     wpConfig.plugins = [];
   }
@@ -68,5 +68,5 @@ export function handler(argv: IArgv) {
     },
   });
 
-  server.listen(argv.updatePort);
+  server.listen(argv['update-port']);
 }

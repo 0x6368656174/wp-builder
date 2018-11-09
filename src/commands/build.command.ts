@@ -3,17 +3,17 @@ import { Options } from 'yargs';
 export const command = 'build';
 export const describe = 'Build site';
 export const builder: {[key: string]: Options} = {
-  deployUrl: {
+  'deploy-url': {
     describe: 'URL where files will be deployed',
     type: 'string',
   },
-  prod: {
+  'prod': {
     alias: 'p',
     default: false,
     describe: 'Build in production mode',
     type: 'boolean',
   },
-  theme: {
+  'theme': {
     alias: 't',
     describe: 'Theme for build',
     type: 'string',
