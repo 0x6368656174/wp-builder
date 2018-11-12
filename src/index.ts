@@ -1,17 +1,15 @@
 #!/usr/bin/env node
 
 import * as yargs from 'yargs';
-
 import * as buildCommand from './commands/build.command';
 import * as initCommand from './commands/init.command';
 import * as lintCommand from './commands/lint.command';
 import * as prettifyCommand from './commands/prettify.command';
 import * as serveCommand from './commands/serve.command';
-import * as sshDeployCommand from './commands/ssh-deploy.command';
+
 
 const argv = yargs.usage('Usage: $0 [command]')
   .command(buildCommand)
-  .command(sshDeployCommand)
   .command(serveCommand)
   .command(initCommand)
   .command(lintCommand)
