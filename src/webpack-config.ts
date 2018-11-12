@@ -390,7 +390,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
           ],
         },
         {
-          test: /\.(png|jpg|gif|svg|ttf|woff|woff2|eot)$/,
+          test: /\.(png|jpg|jpeg|gif|svg|ttf|woff|woff2|eot)$/,
           use: [
             {
               loader: 'url-loader',
