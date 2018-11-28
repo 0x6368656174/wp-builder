@@ -3,7 +3,6 @@ import { lstatSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import * as glob from 'glob';
 import { basename, join, relative } from 'path';
 import { createInterface } from 'readline';
-import * as svg2png from 'svg2png';
 import { runCommand } from './utils';
 
 const rl = createInterface({
@@ -97,7 +96,6 @@ export async function handler() {
   await runCommand('composer', ['install'], dir);
   await runCommand('npm', ['install'], dir);
 
-  await createScreenshot(dir, projectThemeName);
   await runCommand('git', ['add', '.'], dir);
   await runCommand('git', ['commit', '--author="Pavel Puchkov <0x6368656174@gmail.com>"',
     '-m', '"Initial commit"'], dir);
@@ -111,18 +109,6 @@ export async function handler() {
       user: dbUser || 'username_here',
     }, dir);
   }
-}
-
-async function createScreenshot(dir: string, projectThemeName: string) {
-  const svgBuffer = new Buffer(`<svg>
-    <rect width="100%" height="100%" fill="white"/>
-    <text y="450" font-size="30" font-family="Arial, sans-serif">
-       <tspan x="600" text-anchor="middle">${projectThemeName}</tspan>
-   </text>
-</svg>`);
-
-  const pngBuffer = await svg2png(svgBuffer, { width: 1200, height: 900 });
-  writeFileSync(join(dir, 'src', projectThemeName, 'screenshot.png'), pngBuffer);
 }
 
 interface IConfigureDb {
