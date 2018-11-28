@@ -1,7 +1,7 @@
 import * as camelcase from 'camelcase';
-import { lstatSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { lstatSync, mkdirSync, readFileSync, writeFileSync, copyFileSync } from 'fs';
 import * as glob from 'glob';
-import { basename, join, relative } from 'path';
+import { basename, join, relative, extname } from 'path';
 import { createInterface } from 'readline';
 import { runCommand } from './utils';
 
@@ -76,18 +76,22 @@ export async function handler() {
     const newFilePath = relative(join(__dirname, '..', 'starter'), newFileName)
       .replace('%PROJECT_THEME_NAME%', projectThemeName);
     const newFileFullPath = join(dir, newFilePath);
-    const fileContent = readFileSync(file, 'utf-8');
-    const newFileContent = fileContent
-      .replace(/%PROJECT_NAME%/g, projectName)
-      .replace(/%PROJECT_THEME_NAME%/g, projectThemeName)
-      .replace(/%PROJECT_THEME_NAME_PASCAL_CASE%/g, projectThemeNamePascalCase)
-      .replace(/%PROJECT_DESCRIPTION%/g, projectDescription)
-      .replace(/%PROJECT_HOME_PAGE%/g, projectHomePage)
-      .replace(/%AUTHOR_NAME%/g, authorName)
-      .replace(/%AUTHOR_EMAIL%/g, authorEmail)
-      .replace(/%AUTHOR_HOME_PAGE%/g, authorHomePage);
+    if (extname(newFileFullPath) !== '.png') {
+      const fileContent = readFileSync(file, 'utf-8');
+      const newFileContent = fileContent
+        .replace(/%PROJECT_NAME%/g, projectName)
+        .replace(/%PROJECT_THEME_NAME%/g, projectThemeName)
+        .replace(/%PROJECT_THEME_NAME_PASCAL_CASE%/g, projectThemeNamePascalCase)
+        .replace(/%PROJECT_DESCRIPTION%/g, projectDescription)
+        .replace(/%PROJECT_HOME_PAGE%/g, projectHomePage)
+        .replace(/%AUTHOR_NAME%/g, authorName)
+        .replace(/%AUTHOR_EMAIL%/g, authorEmail)
+        .replace(/%AUTHOR_HOME_PAGE%/g, authorHomePage);
 
-    writeFileSync(newFileFullPath, newFileContent);
+      writeFileSync(newFileFullPath, newFileContent);
+    } else {
+      copyFileSync(file, newFileFullPath);
+    }
     process.stdout.write(`Created file ${newFileFullPath}\n`);
   }
 
