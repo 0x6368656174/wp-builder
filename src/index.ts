@@ -7,7 +7,6 @@ import * as lintCommand from './commands/lint.command';
 import * as prettifyCommand from './commands/prettify.command';
 import * as serveCommand from './commands/serve.command';
 
-
 const argv = yargs.usage('Usage: $0 [command]')
   .command(buildCommand)
   .command(serveCommand)

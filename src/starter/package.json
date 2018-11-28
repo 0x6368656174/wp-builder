@@ -4,21 +4,24 @@
   "author": "%AUTHOR_NAME% <%AUTHOR_EMAIL%>",
   "private": true,
   "scripts": {
-    "serve": "wpbuild serve",
+    "start": "wpbuild serve",
     "build": "wpbuild build --prod",
-    "pack": "tar --exclude='dist/wp-content/uploads' -czf dist.tar.gz dist",
     "lint": "wpbuild lint",
-    "fix": "wpbuild prettify && wpbuild lint --fix",
-    "precommit": "lint-staged",
-    "postcommit": "git update-index --again"
+    "lint:fix": "wpbuild prettify && wpbuild lint --fix"
   },
   "devDependencies": {
     "@0x6368656174/wp-builder": "^1.3.1",
     "@types/jquery": "^3.3.2",
-    "husky": "^0.14.3",
-    "lint-staged": "^7.2.0"
+    "husky": "^1.2.0",
+    "lint-staged": "^8.1.0"
   },
   "dependencies": {
     "jquery": "^3.3.1"
+  },
+  "husky": {
+    "hooks": {
+      "post-commit": "git update-index --again",
+      "pre-commit": "lint-staged"
+    }
   }
 }
