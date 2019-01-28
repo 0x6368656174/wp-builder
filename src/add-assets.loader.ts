@@ -18,7 +18,7 @@ module.exports = function(this: LoaderContext, content: string): string {
   const context = join(process.cwd(), project.root);
   const outputPath = '{{ __theme_path }}';
   const isDevelopment = options.mode === 'development';
-  const serve = options.serve;
+  const liveReloadEnable = options.liveReloadEnable;
   const versionString = `?ver=${version(isDevelopment)}`;
   const breakpoints = project.breakpoints || {};
   const breakpointNames = Object.keys(breakpoints);
@@ -59,8 +59,8 @@ module.exports = function(this: LoaderContext, content: string): string {
         `<script type="text/javascript" src="${outputPath}/style.${breakpoint}.js${versionString}" defer></script>\n`;
     }
 
-    // Если serve, то добавим скрипт вебпака
-    if (serve) {
+    // Если liveReloadEnable, то добавим скрипт вебпака
+    if (liveReloadEnable) {
       headScripts += '<script type="text/javascript" src="http://localhost:4201/webpack-dev-server.js" defer></script>\n';
     }
 

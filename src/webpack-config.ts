@@ -4,7 +4,6 @@ import * as cssnano from 'cssnano';
 import * as ExtractTextPlugin from 'extract-text-webpack-plugin';
 import { existsSync, readFileSync } from 'fs';
 import * as glob from 'glob';
-import { flatten } from 'lodash';
 import * as ExtractCssPlugin from 'mini-css-extract-plugin';
 import { join, normalize, resolve } from 'path';
 import * as postcssPresetEnv from 'postcss-preset-env';
@@ -13,16 +12,17 @@ import { Configuration } from 'webpack';
 import {ComposerAutoloadFixPlugin} from './composer-autoload-fix.plugin';
 import { readConfig } from './config-read';
 import { CreateSplitChunksImportTemplatePlugin } from './create-split-chunks-import-template.plugin';
-import { JqueryDependencePlugin } from './jquery-dependence.plugin';
 import { SuppressChunksPlugin } from './suppress-chunks.plugin';
-import {TimberFixPlugin} from './timber-fix.plugin';
 import { version } from './version';
 import SplitChunksOptions = webpack.Options.SplitChunksOptions;
 import {FunctionsPhpPlugin} from './functions-php.plugin';
+import * as WebpackNotifier from 'webpack-notifier';
+// tslint:disable-next-line:no-submodule-imports
+import * as DashboardPlugin from 'webpack-dashboard/plugin';
 
 interface IConfigParams {
   mode: 'development' | 'production';
-  serve?: boolean;
+  liveReloadEnable?: boolean;
   theme?: string;
   deployUrl?: string;
 }
@@ -45,7 +45,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
   testConfig();
 
   const isDevelopment = params.mode === 'development';
-  const serve = params.serve || false;
+  const liveReloadEnable = params.liveReloadEnable || false;
   const wpConfig = readConfig();
 
   const themeName = params.theme || wpConfig.defaultTheme;
@@ -330,7 +330,7 @@ export function webpackConfig(params: IConfigParams): Configuration {
                   loader: 'add-assets.loader',
                   options: {
                     mode: isDevelopment ? 'development' : 'production',
-                    serve,
+                    liveReloadEnable,
                   },
                 },
               ],
@@ -365,7 +365,6 @@ export function webpackConfig(params: IConfigParams): Configuration {
             {
               loader: 'css-loader',
               options: {
-                minimize: !isDevelopment,
                 sourceMap: isDevelopment,
               },
             },
@@ -452,6 +451,10 @@ export function webpackConfig(params: IConfigParams): Configuration {
         'window.$'         : 'jquery',
         'window.jQuery'    : 'jquery',
       }),
+      new WebpackNotifier({
+        title: 'wp-build',
+      }),
+      new (DashboardPlugin as any)(),
     ],
     resolve: {
       // Добавим ts, чтоб правильно компилировался TypeScript

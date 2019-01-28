@@ -12,6 +12,11 @@ export const builder: {[key: string]: Options} = {
     describe: 'Host',
     type: 'string',
   },
+  'live-reload': {
+    default: true,
+    describe: 'Reload page after file changes',
+    type: 'boolean',
+  },
   'port': {
     default: 4200,
     describe: 'Port',

@@ -16,6 +16,7 @@ interface IArgv {
   prod: boolean;
   theme?: string;
   'deploy-url'?: string;
+  liveReload: boolean;
 }
 
 function getRandomInt(min: number, max: number) {
@@ -53,7 +54,7 @@ export function handler(argv: IArgv) {
   php.stdout.on('data', data => process.stdout.write(`PHP: ${data}`));
   php.stderr.on('data', data => process.stderr.write(`PHP: ${data}`));
 
-  const wpConfig = webpackConfig({mode, theme, serve: true, deployUrl: argv['deploy-url']});
+  const wpConfig = webpackConfig({mode, theme, liveReloadEnable: argv.liveReload, deployUrl: argv['deploy-url']});
   if (!wpConfig.plugins) {
     wpConfig.plugins = [];
   }
@@ -61,6 +62,7 @@ export function handler(argv: IArgv) {
   const compiler = webpack(wpConfig);
   const server = new WebpackDevServer(compiler, {
     contentBase: dist,
+    overlay: true,
     stats: statsConfig as any, // FIXME: Проверить типы
     watchOptions: {
       aggregateTimeout: 300,
