@@ -33,7 +33,7 @@ export const builder: {[key: string]: Options} = {
     describe: 'Theme for build',
     type: 'string',
   },
-  'update-port': {
+  'webpack-port': {
     default: 4201,
     describe: 'Port for webpack live update server',
     type: 'number',

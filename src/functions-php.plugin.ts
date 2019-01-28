@@ -25,6 +25,7 @@ require_once __DIR__.'/../../../vendor/autoload.php';
 
 use Timber\\Timber;
 
+Timber::$cache = !WP_DEBUG;
 $timber = new Timber();
 $timber::$dirname = ['Resources/views', 'views'];
 
