@@ -1,7 +1,6 @@
 import { existsSync, writeFileSync } from 'fs';
 import * as mkdirp from 'mkdirp';
 import { join, parse } from 'path';
-import { Compiler } from 'webpack';
 import * as webpack from 'webpack';
 import Compilation = webpack.compilation.Compilation;
 import { version } from './version';
@@ -9,14 +8,7 @@ import { version } from './version';
 export class CreateSplitChunksImportTemplatePlugin {
   private chunkNames = ['runtime', 'vendors', 'commons'];
 
-  private sort(leftFileName: string, rightFileName: string): number {
-    const leftBaseName = parse(leftFileName).name;
-    const rightBaseName = parse(rightFileName).name;
-
-    return this.chunkNames.indexOf(leftBaseName) > this.chunkNames.indexOf(rightBaseName) ? 1 : -1;
-  }
-
-  apply(compiler: Compiler) {
+  public apply(compiler: webpack.Compiler) {
     const isDevelopment = compiler.options.mode === 'development';
     const versionString = `?ver=${version(isDevelopment)}`;
 
@@ -54,5 +46,12 @@ export class CreateSplitChunksImportTemplatePlugin {
       writeFileSync(join(viewsFolder, '__split-chunks.twig'), twig);
       return true;
     });
+  }
+
+  private sort(leftFileName: string, rightFileName: string): number {
+    const leftBaseName = parse(leftFileName).name;
+    const rightBaseName = parse(rightFileName).name;
+
+    return this.chunkNames.indexOf(leftBaseName) > this.chunkNames.indexOf(rightBaseName) ? 1 : -1;
   }
 }

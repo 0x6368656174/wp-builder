@@ -1,7 +1,7 @@
 import * as camelcase from 'camelcase';
-import { lstatSync, mkdirSync, readFileSync, writeFileSync, copyFileSync } from 'fs';
+import { copyFileSync, lstatSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import * as glob from 'glob';
-import { basename, join, relative, extname } from 'path';
+import { basename, extname, join, relative } from 'path';
 import { createInterface } from 'readline';
 import { runCommand } from './utils';
 

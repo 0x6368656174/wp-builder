@@ -1,11 +1,10 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { Compiler } from 'webpack';
 import * as webpack from 'webpack';
 import Compilation = webpack.compilation.Compilation;
 
 export class ComposerAutoloadFixPlugin {
-  public apply(compiler: Compiler) {
+  public apply(compiler: webpack.Compiler) {
     compiler.hooks.afterEmit.tap('ComposerAutoloadFixPlugin', async (compilation: Compilation) => {
       const staticAutoloadPath = join(process.cwd(), 'dist', 'vendor', 'composer', 'autoload_static.php');
       const staticAutoload = readFileSync(staticAutoloadPath, 'utf-8');

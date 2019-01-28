@@ -1,11 +1,9 @@
-import { basename, extname, join } from 'path';
-import { Compiler } from 'webpack';
+import { basename, extname } from 'path';
 import * as webpack from 'webpack';
-import Compilation = webpack.compilation.Compilation;
 import { readConfig } from './config-read';
 
 export class JqueryDependencePlugin {
-  public static getContent(compiler: Compiler, compilation: Compilation) {
+  public static getContent(compiler: webpack.Compiler, compilation: webpack.compilation.Compilation) {
     const wpConfig = readConfig();
 
     const ignoreNames = ['style.js', 'vendors.js', 'commons.js', 'runtime.js'];

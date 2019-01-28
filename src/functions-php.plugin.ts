@@ -1,15 +1,14 @@
-import { existsSync, writeFileSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+import * as mkdirp from 'mkdirp';
 import { join } from 'path';
-import { Compiler } from 'webpack';
 import * as webpack from 'webpack';
+import {readConfig} from './config-read';
 import Compilation = webpack.compilation.Compilation;
 import {JqueryDependencePlugin} from './jquery-dependence.plugin';
 import {TimberFixPlugin} from './timber-fix.plugin';
-import {readConfig} from './config-read';
-import * as mkdirp from 'mkdirp';
 
 export class FunctionsPhpPlugin {
-  public apply(compiler: Compiler) {
+  public apply(compiler: webpack.Compiler) {
     compiler.hooks.afterEmit.tap('FunctionsPhpPlugin',  (compilation: Compilation) => {
 
       const outputPath = (compiler.options.output || {}).path || '';

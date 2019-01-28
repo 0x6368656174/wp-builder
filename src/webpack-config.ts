@@ -8,17 +8,14 @@ import * as ExtractCssPlugin from 'mini-css-extract-plugin';
 import { join, normalize, resolve } from 'path';
 import * as postcssPresetEnv from 'postcss-preset-env';
 import * as webpack from 'webpack';
-import { Configuration } from 'webpack';
+import * as WebpackNotifier from 'webpack-notifier';
 import {ComposerAutoloadFixPlugin} from './composer-autoload-fix.plugin';
 import { readConfig } from './config-read';
 import { CreateSplitChunksImportTemplatePlugin } from './create-split-chunks-import-template.plugin';
-import { SuppressChunksPlugin } from './suppress-chunks.plugin';
-import { version } from './version';
 import SplitChunksOptions = webpack.Options.SplitChunksOptions;
 import {FunctionsPhpPlugin} from './functions-php.plugin';
-import * as WebpackNotifier from 'webpack-notifier';
-// tslint:disable-next-line:no-submodule-imports
-import * as DashboardPlugin from 'webpack-dashboard/plugin';
+import { SuppressChunksPlugin } from './suppress-chunks.plugin';
+import { version } from './version';
 
 interface IConfigParams {
   mode: 'development' | 'production';
@@ -40,7 +37,7 @@ function testConfig() {
   // }
 }
 
-export function webpackConfig(params: IConfigParams): Configuration {
+export function webpackConfig(params: IConfigParams): webpack.Configuration {
   // Проверим конфигу
   testConfig();
 
@@ -329,8 +326,8 @@ export function webpackConfig(params: IConfigParams): Configuration {
                 {
                   loader: 'add-assets.loader',
                   options: {
-                    mode: isDevelopment ? 'development' : 'production',
                     liveReloadEnable,
+                    mode: isDevelopment ? 'development' : 'production',
                   },
                 },
               ],
@@ -454,7 +451,6 @@ export function webpackConfig(params: IConfigParams): Configuration {
       new WebpackNotifier({
         title: 'wp-build',
       }),
-      new (DashboardPlugin as any)(),
     ],
     resolve: {
       // Добавим ts, чтоб правильно компилировался TypeScript

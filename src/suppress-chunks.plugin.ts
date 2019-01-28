@@ -1,12 +1,10 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
-import { Compiler } from 'webpack';
 import * as webpack from 'webpack';
-import Compilation = webpack.compilation.Compilation;
 import { readConfig } from './config-read';
 
 export class SuppressChunksPlugin {
-  public apply(compiler: Compiler) {
+  public apply(compiler: webpack.Compiler) {
     const wpConfig = readConfig();
     const project = wpConfig.themes[wpConfig.defaultTheme];
     const context = join(process.cwd(), project.root);
@@ -15,7 +13,7 @@ export class SuppressChunksPlugin {
     const breakpoints = Object.keys(project.breakpoints || {}).map(breakpoint => `style.${breakpoint}`);
     skipChunkNames.push(...breakpoints);
 
-    compiler.hooks.shouldEmit.tap('SuppressChunksPlugin', (compilation: Compilation) => {
+    compiler.hooks.shouldEmit.tap('SuppressChunksPlugin', (compilation: webpack.compilation.Compilation) => {
       for (const chunk of compilation.chunks) {
         if (skipChunkNames.indexOf(chunk.name) !== -1) {
           continue;

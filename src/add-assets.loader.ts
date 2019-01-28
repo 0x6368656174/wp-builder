@@ -1,8 +1,8 @@
 import { existsSync } from 'fs';
 import { getOptions } from 'loader-utils';
 import { basename, join } from 'path';
-import { readConfig } from './config-read';
 import * as webpack from 'webpack';
+import { readConfig } from './config-read';
 import LoaderContext = webpack.loader.LoaderContext;
 import { version } from './version';
 
